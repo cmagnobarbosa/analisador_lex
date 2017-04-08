@@ -36,10 +36,11 @@ for i in arquivo:
         if estado is 0:
             """Define o estado inicial"""
             if re.match(r"([A-Za-z_])", k):
+                """Pesquisa por identificadores validos"""
                 estado = 1  # Identificador
             if re.match(r"[0-9]", k):
-
-                estado = 2  # Constante Numerica
+                """Pesquisa por Constante Numérica"""
+                estado = 2  # Constante Numérica
             if k in operadores:
                 token = token + k + "|"
                 estado = 0
@@ -74,7 +75,7 @@ for i in arquivo:
                         estado = 0
                         numerico = ""
                 else:
-                    lista_erros.append([numerico, linha])
+                    lista_erros.append([numerico, "l:"+str(linha)])
                     numerico = ""
             else:
                 if k in sep_num:
