@@ -52,11 +52,8 @@ for i in arquivo:
             if k in separadores or re.match(r"(\s)", k):
                 """Lista com separadores"""
                 estado = 0
-                #print "Valor presente em k:" , k
                 token_geral.append(["Iden ",token,"l: "+str(linha)])
                 token_geral.append(["Sep ",k,"l:"+str(linha)])
-                #token = "|Iden, " + token + ", L:" + \
-                #str(linha) + gera_marcador(k) + ", L:" + str(linha) + "|"
                 token = ""
 
         if estado is 2:
@@ -67,9 +64,8 @@ for i in arquivo:
 
                 if(re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)):
                     valor = re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)
-                    #print "numerico ",numerico
                     if valor is not None:
-                        #token = token + "Num, " + valor.group() + ",L:" + str(linha) + gera_marcador(k)
+
                         token_geral.append(["Num",valor.group(),"l:"+str(linha)])
                         token_geral.append(["Sep",k,"l:"+str(linha)])
                         estado = 0
@@ -83,8 +79,7 @@ for i in arquivo:
                     token_geral.append(["Sep",k,"l:"+str(linha)])
 
 
-#formata_tokens(token)
+
 print "Identificadores ",token_geral
 exibe_tokens(token_geral)
 print "Erros ",lista_erros
-# print "Erro", lista_erros
