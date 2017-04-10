@@ -42,14 +42,14 @@ for i in arquivo:
                 """Pesquisa por Constante Numérica"""
                 estado = 2  # Constante Numérica
             if k in operadores:
-                token = token + k + "|"
+                token_geral.append([k])
                 estado = 0
 
         if estado is 1:
             """Valida Identificador"""
             if re.match(r"([A-za-z0-9])", k):
                 token = token + k
-            if k in separadores or re.match(r"(\s)", k):
+            if k in separadores or re.match(r"(\s)", k) or k in operadores:
                 """Lista com separadores"""
                 estado = 0
                 token_geral.append(["Iden ",token,"l: "+str(linha)])
