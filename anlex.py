@@ -7,6 +7,16 @@ def converte_simbolos():
     """Substitui simbolos por números"""
     pass
 
+
+def verifica_reservada(token):
+    reservada_list = ['int', 'float', 'char', 'if', 'else', 'printf',
+                      'for', 'while', 'return', 'continue', 'break', 'read']
+    cont = 0
+    for i in reservada_list:
+        cont = cont + 1
+        if (token in i):
+            return cont
+
 def exibe_tokens(lista):
     for i in lista:
         print i
@@ -20,8 +30,8 @@ except Exception as e:
 token = ""
 numerico = ""
 estado = 0
-separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.']
-sep_num = [';',',', '=']
+separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.', '\\n']
+sep_num = [';', ',', '=']
 operadores = ['-', '+', '/', '*']
 op_log = ['&&', '||', '>', '<', '>=', '<=', '==', '!=']
 lista_erros = []
@@ -42,6 +52,7 @@ for i in arquivo:
                 """Pesquisa por Constante Numérica"""
                 estado = 2  # Constante Numérica
             if k in operadores:
+
                 token_geral.append([k])
                 estado = 0
 
@@ -52,9 +63,17 @@ for i in arquivo:
             if k in separadores or re.match(r"(\s)", k) or k in operadores:
                 """Lista com separadores"""
                 estado = 0
-                token_geral.append(["Iden ",token,"l: "+str(linha)])
-                token_geral.append(["Sep ",k,"l:"+str(linha)])
-                token = ""
+                reservado = re.match(
+                    r"(int)|(float)|(char)|(if)|(else)|(printf)|(for)|(while)|(return)|(continue)|(break)|(read)", token)
+                if reservado is not None:
+                    token_geral.append(
+                        ["Reservado Cod: "+str(verifica_reservada(token)),reservado.group(), " l: " + str(linha)])
+                    token_geral.append(["Sep ", k, "l:" + str(linha)])
+                    token = ""
+                else:
+                    token_geral.append(["Iden ", token, "l: " + str(linha)])
+                    token_geral.append(["Sep ", k, "l:" + str(linha)])
+                    token = ""
 
         if estado is 2:
             """Estado de indentificacao de constante numerica"""
@@ -66,20 +85,22 @@ for i in arquivo:
                     valor = re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)
                     if valor is not None:
 
-                        token_geral.append(["Num",valor.group(),"l:"+str(linha)])
-                        token_geral.append(["Sep",k,"l:"+str(linha)])
+                        token_geral.append(
+                            ["Num", valor.group(), "l:" + str(linha)])
+                        token_geral.append(["Sep", k, "l:" + str(linha)])
                         estado = 0
                         numerico = ""
                 else:
-                    lista_erros.append([numerico, "l:"+str(linha)])
+                    lista_erros.append([numerico, "l:" + str(linha)])
                     numerico = ""
+                    estado = 0
             else:
                 if k in sep_num:
                     "Armazena token de separadores"
-                    token_geral.append(["Sep",k,"l:"+str(linha)])
+                    token_geral.append(["Sep", k, "l:" + str(linha)])
+                    estado = 0
 
 
-
-print "Identificadores ",token_geral
+#print "Identificadores ", token_geral
 exibe_tokens(token_geral)
-print "Erros ",lista_erros
+print "Erros ", lista_erros
