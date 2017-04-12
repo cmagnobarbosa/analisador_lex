@@ -70,13 +70,15 @@ for i in arquivo:
             """Valida Identificador"""
             if re.match(r"([A-za-z0-9])", k):
                 token = token + k
+
             else:
                 if k in operadores:
                     lit = re.match(r"[\+]{2}|[\+]", k)
                     if lit is not None:
                         token = token + lit.group()
                     estado = 0
-            if k in separadores or re.match(r"(\s)", k) or k in operadores:
+            if k in separadores or re.match(r"(\s\+\-\*)", k):
+
                 """Lista com separadores"""
                 estado = 0
                 reservado = re.match(
@@ -88,6 +90,7 @@ for i in arquivo:
                         token_geral.append(["Sep ", k, "l:" + str(linha)])
                     token = ""
                 else:
+
                     token_geral.append(["Iden ", token, "l: " + str(linha)])
                     if k is not " ":
                         token_geral.append(["Sep ", k, "l:" + str(linha)])
@@ -108,10 +111,11 @@ for i in arquivo:
 
                         token_geral.append(
                             ["Num", valor.group(), "l:" + str(linha)])
-                        if k is not " " and k not in operadores:
+                        if k is not " ":
                             token_geral.append(["Sep", k, "l:" + str(linha)])
                         else:
                             if k in operadores:
+                                print token
                                 token = token + k
                         estado = 0
                         numerico = ""
@@ -142,6 +146,9 @@ for i in arquivo:
                 token = token + k
             else:
                 lit = re.search(r"[\+]{2}|[\+]", token)
+                word= re.search(r"[\w]",token)
+                if word is not None:
+                    token_geral.append(["Iden ",word.group(), "l: " + str(linha)])
                 if lit is not None:
                     token_geral.append([lit.group(), "l: " + str(linha)])
                 token = " "
