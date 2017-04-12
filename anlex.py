@@ -7,6 +7,8 @@ def converte_simbolos():
     """Substitui simbolos por números"""
     pass
 
+def add_token(lista,token,linha):
+    pass
 
 def verifica_reservada(token):
     reservada_list = ['int', 'float', 'char', 'if', 'else', 'printf',
@@ -30,7 +32,7 @@ except Exception as e:
 token = ""
 numerico = ""
 estado = 0
-separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.', '\\n']
+separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.', '\n']
 sep_num = [';', ',', '=']
 operadores = ['-', '+', '/', '*']
 op_log = ['&&', '||', '>', '<', '>=', '<=', '==', '!=']
@@ -51,15 +53,20 @@ for i in arquivo:
             if re.match(r"[0-9]", k):
                 """Pesquisa por Constante Numérica"""
                 estado = 2  # Constante Numérica
-            if k in operadores:
-
-                token_geral.append([k])
-                estado = 0
-
+            if re.match(r"[\+]{2}|[\+]",k):
+                estado = 4
+            if re.match(r"[\"]",k):
+                estado = 3
         if estado is 1:
             """Valida Identificador"""
             if re.match(r"([A-za-z0-9])", k):
                 token = token + k
+            else:
+                if k in operadores:
+                    lit = re.match(r"[\+]{2}|[\+]",k)
+                    if lit is not None:
+                        token = token + lit.group()
+                    estado = 0
             if k in separadores or re.match(r"(\s)", k) or k in operadores:
                 """Lista com separadores"""
                 estado = 0
@@ -68,12 +75,17 @@ for i in arquivo:
                 if reservado is not None:
                     token_geral.append(
                         ["Reservado Cod: "+str(verifica_reservada(token)),reservado.group(), " l: " + str(linha)])
-                    token_geral.append(["Sep ", k, "l:" + str(linha)])
+                    if k is not " ":
+                        token_geral.append(["Sep ", k, "l:" + str(linha)])
                     token = ""
                 else:
                     token_geral.append(["Iden ", token, "l: " + str(linha)])
-                    token_geral.append(["Sep ", k, "l:" + str(linha)])
+                    if k is not " ":
+                        token_geral.append(["Sep ", k, "l:" + str(linha)])
                     token = ""
+            else:
+                if k is operadores:
+                    estado = 0
 
         if estado is 2:
             """Estado de indentificacao de constante numerica"""
@@ -87,7 +99,11 @@ for i in arquivo:
 
                         token_geral.append(
                             ["Num", valor.group(), "l:" + str(linha)])
-                        token_geral.append(["Sep", k, "l:" + str(linha)])
+                        if k is not " " and k not in operadores:
+                            token_geral.append(["Sep", k, "l:" + str(linha)])
+                        else:
+                            if k in operadores:
+                                token = token + k
                         estado = 0
                         numerico = ""
                 else:
@@ -97,9 +113,29 @@ for i in arquivo:
             else:
                 if k in sep_num:
                     "Armazena token de separadores"
-                    token_geral.append(["Sep", k, "l:" + str(linha)])
+                    if k is not " ":
+                        token_geral.append(["Sep", k, "l:" + str(linha)])
                     estado = 0
 
+        if estado is 3:
+            if re.match(r"[a-zA-z0-9\"\s]",k):
+                token = token + k
+                if re.match(r"[\"]",k):
+                    lit =re.match(r"[\"]+[\w\s]+[\"]*",token)
+                    if lit is not None:
+                        token_geral.append(["Literal",lit.group(), "l: " + str(linha)])
+                        token = ""
+                        estado = 0
+
+        if estado is 4:
+            if re.match(r"[\+]{2}|[\+]",k):
+                token = token + k
+            else:
+                lit = re.search(r"[\+]{2}|[\+]",token)
+                if lit is not None:
+                    token_geral.append([lit.group(), "l: " + str(linha)])
+                token = " "
+                estado= 0
 
 #print "Identificadores ", token_geral
 exibe_tokens(token_geral)
