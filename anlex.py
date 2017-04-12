@@ -1,4 +1,10 @@
 # coding:utf-8
+"""
+Analisador Lexico
+Licença: MIT
+Carlos Magno Geraldo Barbosa
+UFSJ
+"""
 import sys
 import re
 
@@ -7,8 +13,10 @@ def converte_simbolos():
     """Substitui simbolos por números"""
     pass
 
-def add_token(lista,token,linha):
+
+def add_token(lista, token, linha):
     pass
+
 
 def verifica_reservada(token):
     reservada_list = ['int', 'float', 'char', 'if', 'else', 'printf',
@@ -18,6 +26,7 @@ def verifica_reservada(token):
         cont = cont + 1
         if (token in i):
             return cont
+
 
 def exibe_tokens(lista):
     for i in lista:
@@ -53,9 +62,9 @@ for i in arquivo:
             if re.match(r"[0-9]", k):
                 """Pesquisa por Constante Numérica"""
                 estado = 2  # Constante Numérica
-            if re.match(r"[\+]{2}|[\+]",k):
+            if re.match(r"[\+]{2}|[\+]", k):
                 estado = 4
-            if re.match(r"[\"]",k):
+            if re.match(r"[\"]", k):
                 estado = 3
         if estado is 1:
             """Valida Identificador"""
@@ -63,7 +72,7 @@ for i in arquivo:
                 token = token + k
             else:
                 if k in operadores:
-                    lit = re.match(r"[\+]{2}|[\+]",k)
+                    lit = re.match(r"[\+]{2}|[\+]", k)
                     if lit is not None:
                         token = token + lit.group()
                     estado = 0
@@ -74,7 +83,7 @@ for i in arquivo:
                     r"(int)|(float)|(char)|(if)|(else)|(printf)|(for)|(while)|(return)|(continue)|(break)|(read)", token)
                 if reservado is not None:
                     token_geral.append(
-                        ["Reservado Cod: "+str(verifica_reservada(token)),reservado.group(), " l: " + str(linha)])
+                        ["Reservado Cod: " + str(verifica_reservada(token)), reservado.group(), " l: " + str(linha)])
                     if k is not " ":
                         token_geral.append(["Sep ", k, "l:" + str(linha)])
                     token = ""
@@ -118,25 +127,26 @@ for i in arquivo:
                     estado = 0
 
         if estado is 3:
-            if re.match(r"[a-zA-z0-9\"\s]",k):
+            if re.match(r"[a-zA-z0-9\"\s]", k):
                 token = token + k
-                if re.match(r"[\"]",k):
-                    lit =re.match(r"[\"]+[\w\s]+[\"]*",token)
+                if re.match(r"[\"]", k):
+                    lit = re.match(r"[\"]+[\w\s]+[\"]*", token)
                     if lit is not None:
-                        token_geral.append(["Literal",lit.group(), "l: " + str(linha)])
+                        token_geral.append(
+                            ["Literal", lit.group(), "l: " + str(linha)])
                         token = ""
                         estado = 0
 
         if estado is 4:
-            if re.match(r"[\+]{2}|[\+]",k):
+            if re.match(r"[\+]{2}|[\+]", k):
                 token = token + k
             else:
-                lit = re.search(r"[\+]{2}|[\+]",token)
+                lit = re.search(r"[\+]{2}|[\+]", token)
                 if lit is not None:
                     token_geral.append([lit.group(), "l: " + str(linha)])
                 token = " "
-                estado= 0
+                estado = 0
 
-#print "Identificadores ", token_geral
+# print "Identificadores ", token_geral
 exibe_tokens(token_geral)
 print "Erros ", lista_erros
