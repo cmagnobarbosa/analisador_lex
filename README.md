@@ -3,7 +3,7 @@ Analisador Lexico - Compiladores UFSJ
 - Carlos Magno
 
 # Sobre o Analisador
-Este analisador apresenta uma implementação simples de analisador lexico. O mesmo está escrito em python 2.7. Este trabalho faz parte da implementação da etapas de análise de um compilador.
+Este analisador apresenta uma implementação simples de analisador lexico. O mesmo está escrito em python 2.7. Este trabalho faz parte da implementação das etapas de análise de um compilador.
 
 # Arquivo principal
 O arquivo principal do projeto é o anlex.py.
@@ -13,7 +13,7 @@ O arquivo principal do projeto é o anlex.py.
 Para executar o analisador em um ambiente Linux ou Windows é necessario possuir o python 2.7 instalado. Com o python instalado abra o terminal e siga os passos abaixo.
 
 Neste caso o arquivo de teste a ser carregado é o teste2.c
-> python anlex.py 
+> python anlex.py
 
 Para executar o teste com um arquivo em C personalizado digite:
 >python anlex.py nome_do_arquivo.c
