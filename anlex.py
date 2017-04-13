@@ -29,27 +29,36 @@ def conta_mais(linha,token_geral):
                     flag =1
                 if i is "*":
                     token_geral.append("[*]")
+                    lista.append("[*]")
                     flag =1
             if (len(n_mais) == 2):
                 if k is "+":
-                    lista.append(["++"])
-                    token_geral.append(["++"])
+                    token_geral.append("[++]")
                 if k is "-":
-                    lista.append("--")
-                    token_geral.append(["--"])
+                    token_geral.append("[--]")
                 n_mais= ""
         if n_mais is not "" and not flag:
-            lista.append(n_mais)
+
             token_geral.append("["+str(n_mais)+"]")
             n_mais=""
-    #print lista
+
 def add_operadores(linha):
     grupo_op = re.search(r"\+{2}|\-{2}|(\+\-)|(\-\+)|\*{2}|(\^\-)|(\^){2}",linha)
     if grupo_op is not None:
         return 1
     else:
         return 0
-
+def ver_iden(elemento):
+    """Verifica se o elemento é um separador dos numeros"""
+    if(re.match(r"[\w]",elemento)):
+        return 0
+    else:
+        return 1
+def ver_num(elemento):
+    if(re.match(r"[\d.]",elemento)):
+        return 0
+    else:
+        return 1
 def verifica_reservada(token):
     reservada_list = ['int', 'float', 'char', 'if', 'else', 'printf',
                       'for', 'while', 'return', 'continue', 'break', 'read']
@@ -57,10 +66,14 @@ def verifica_reservada(token):
     #print token
     for i in reservada_list:
         cont = cont + 1
-        if (token in i):
+        if (token == i):
             return cont
 
-
+def ver_oplog(token,lista):
+    for i in lista:
+        if token in i:
+            return 1
+    return 0
 def exibe_tokens(lista):
     for i in lista:
         print i
@@ -75,7 +88,7 @@ token = ""
 numerico = ""
 estado = 0
 separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.', '\n']
-sep_num = [';', ',', '=']
+#sep_num = [';', ',', '=']
 operadores = ['-', '+', '/', '*','^']
 op_log = ['&&', '||', '>', '<', '>=', '<=', '==', '!=']
 lista_erros = []
@@ -112,20 +125,21 @@ for i in arquivo:
                     flag_linha = 1
                 if flag:
                     estado = 0
+            if ver_num(k) and ver_iden(k):
+                if not re.search(r"\s",k):
+                    token_geral.append("[ "+k+" ]")
+                estado = 0
         if estado is 1:
             """Valida Identificador"""
             if re.match(r"([\w])", k):
                 token = token + k
-            if k in separadores or re.match(r"(\s)", k) or k in operadores:
-
+            if ver_iden(k):
                 """Lista com separadores"""
                 estado = 0
-                reservado = re.match(
-                    r"(int)|(float)|(char)|(if)|(else)|(printf)|(for)|(while)|(return)|(continue)|(break)|(read)", token)
-                if reservado is not None:
-                    tabela_token[id_tabela]= ["Reservado Cod: " + str(verifica_reservada(token)), reservado.group(),add_linha_coluna(token,linha,coluna)]
+                if verifica_reservada(token):
+                    tabela_token[id_tabela]= ["Reservado Cod: " + str(verifica_reservada(token)),token,add_linha_coluna(token,linha,coluna)]
                     token_geral.append(
-                        ["Reservado Cod: " + str(verifica_reservada(token)), reservado.group(),add_linha_coluna(token,linha,coluna)])
+                        ["Reservado Cod: " + str(verifica_reservada(token)), token,add_linha_coluna(token,linha,coluna)])
                     if k is not " " and not add_operadores(i):
                             token_geral.append(["Sep ", k,add_linha_coluna(token,linha,coluna)])
                     token = ""
@@ -140,8 +154,7 @@ for i in arquivo:
             """Estado de indentificacao de constante numerica"""
             if re.match(r"[\w.]", k):
                 numerico = numerico + k
-            if k in sep_num or k in operadores or re.match(r"\s", k):
-
+            if ver_num(k):
                 if(re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)):
                     valor = re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)
                     if valor is not None:
@@ -157,7 +170,7 @@ for i in arquivo:
                     numerico = ""
                     estado = 0
             else:
-                if k in sep_num:
+                if ver_num(k):
                     "Armazena token de separadores"
                     if k is not " " and not add_operadores(i):
                         token_geral.append(["Sep", k,add_linha_coluna(k,linha,coluna)])
@@ -179,4 +192,3 @@ for i in arquivo:
 exibe_tokens(token_geral)
 print "Erros ", lista_erros
 print "Tabela ", tabela_token
-#print "tt",acumula
