@@ -8,6 +8,31 @@ UFSJ
 import sys
 import re
 
+def add_oplog(i,op_log,token_geral):
+    #op_log = ['&&', '||', '>', '<', '>=', '<=', '==', '!=']
+    if re.search(r"(=){2}",i):
+        token_geral.append("[==]")
+        return 1
+    if re.search(r"(!=)",i):
+        token_geral.append("[!=]")
+        return 1
+    if re.search(r"(&){2}",i):
+        token_geral.append("[&&]")
+        return 1
+    if re.search(r"(\|){2}",i):
+        token_geral.append("[||]")
+        return 1
+    if re.search(r">=",i):
+        token_geral.append("[>=]")
+        return 1
+    if re.search(r"<=",i):
+        token_geral.append("[<=]")
+        return 1
+    else:
+        valor = re.search(r"=",i)
+        if valor is not None:
+            token_geral.append("[=]")
+        return 0
 def add_linha_coluna(token,linha,coluna):
     """Adiciona linha e coluna"""
     p_inicio = coluna-len(token)
@@ -126,8 +151,9 @@ for i in arquivo:
                 if flag:
                     estado = 0
             if ver_num(k) and ver_iden(k):
-                if not re.search(r"\s",k):
-                    token_geral.append("[ "+k+" ]")
+                if not re.search(r"\s",k) and ver_oplog(k,op_log):
+                    if not ver_oplog(k,op_log):
+                        token_geral.append("[ "+k+" ]")
                 estado = 0
         if estado is 1:
             """Valida Identificador"""
@@ -147,6 +173,9 @@ for i in arquivo:
                     tabela_token[id_tabela]= ["Iden ", token,add_linha_coluna(token,linha,coluna)]
                     token_geral.append(["Iden ", token,add_linha_coluna(token,linha,coluna)])
                     if k is not " " and not add_operadores(i):
+                        if ver_oplog(k,op_log):
+                            add_oplog(i,op_log,token_geral)
+                        else:
                             token_geral.append(["Sep ", k,add_linha_coluna(token,linha,coluna)])
                     token = ""
 
