@@ -66,7 +66,6 @@ def ver_num(elemento):
         """Se ele não pertence retorna 1"""
         return 1
 
-
 def verifica_reservada(token):
     """Verifica se determinado token é reservado e retorna um código para o mesmo"""
     reservada_list = ['int', 'float', 'char', 'if', 'else', 'printf',
@@ -88,6 +87,7 @@ def exibe_imprime(nome,lista):
         arq.write(str(i) + "\n")
 
     arq.close()
+
 def imprime_tabela(tabela_token):
     "Imprime a tabela de tokens"
     arq_tabela = open("tabela_simbolos_simp", "w")
@@ -95,21 +95,28 @@ def imprime_tabela(tabela_token):
     for i in sorted(tabela_token):
         arq_tabela.write("Chave:" + str(i) + " " + str(tabela_token[i]) + "\n")
     arq_tabela.close()
-try:
-    nome = sys.argv[1]
-    arquivo = open(nome, "r")
-except Exception as e:
-    arquivo = open("teste2.c", "r")
+
+def open_file():
+    """Abre o arquivo de entrada"""
+    try:
+        nome = sys.argv[1]
+        arquivo = open(nome, "r")
+    except Exception as e:
+        arquivo = open("teste2.c", "r")
+    return arquivo
+
+arquivo= open_file()
 for i in arquivo:
     linha = linha + 1
     coluna = 0
     for k in i:
         id_tabela = (id_tabela + 1)
         coluna = coluna + 1
+
         if estado is 0:
             """Define o estado inicial"""
             if k is "/" and i[1] is "*" and estado == 0 and estado != 4:
-                print "entrouu"
+                """Comentario"""
                 estado = 4
                 token_geral.append(["/*"])
             if re.search(r"^(#)|[/]{2}", i) and estado == 0 and estado != 4:
@@ -215,6 +222,7 @@ for i in arquivo:
 agrupa(token_geral)
 exibe_imprime("token_saida",token_geral)
 exibe_imprime("lista_erros",lista_erros)
+lista_erros=[]
 print "Tabela", tabela_token
 imprime_tabela(tabela_token)
-print "Comentario", acumula
+print "Comentário:", acumula
