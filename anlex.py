@@ -12,93 +12,44 @@ import re
 token = ""
 numerico = ""
 estado = 0
-separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.']
-operadores = ['-', '+', '/', '*', '^']
-op_log = ['&&', '||', '>', '<', '>=', '<=', '==', '!=']
+#separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.']
+#operadores = ['-', '+', '/', '*', '^']
 lista_erros = []
 token_geral = []
 tabela_token = {}
 linha = 0
 coluna = 0
-flag = 0
 id_tabela = 0
-flag_linha = 0
 acumula = ""
 
+def aux_agrupa(elemento,i,lista,cont,elemento_double,next_elemento):
+    """Auxilia a função que agrupa"""
+    if elemento in i:
+        if next_elemento in lista[cont+1]:
+            lista.pop(cont+1)
+            lista.insert(cont,[elemento_double])
+            lista.pop(cont+1)
 
-def teste_log(token):
-    """Se não estiver presente insira"""
-    #'&&', '||', '>', '<', '>=', '<=', '==', '!='
-    if re.search(r"(=){2}|(!=)|(\|){2}|(&){2}|(/)", token):
-        return 0
-    else:
-        return 1
-
-
-def add_oplog(i, token_geral):
-    """Adiciona os operadores logicos em casos especiais"""
-    if re.search(r"(=){2}", i):
-        token_geral.append("[==]")
-        return 1
-    if re.search(r"(!=)", i):
-        token_geral.append("[!=]")
-        return 1
-    if re.search(r"(&){2}", i):
-        token_geral.append("[&&]")
-        return 1
-    if re.search(r"(\|){2}", i):
-        token_geral.append("[||]")
-        return 1
-    if re.search(r">=", i):
-        token_geral.append("[>=]")
-        return 1
-    if re.search(r"<=", i):
-        token_geral.append("[<=]")
-        return 1
-    else:
-        valor = re.search(r"=", i)
-        if valor is not None:
-            token_geral.append("[=]")
-        return 0
+def agrupa(lista):
+    """Agrupa os elementos na lista"""
+    cont =0
+    #print lista
+    for i in lista:
+        aux_agrupa("+",i,lista,cont,"++","+")
+        aux_agrupa("-",i,lista,cont,"--","-")
+        aux_agrupa("=",i,lista,cont,"==","=")
+        aux_agrupa("&",i,lista,cont,"&&","&")
+        aux_agrupa("|",i,lista,cont,"||","|")
+        aux_agrupa("<",i,lista,cont,"<=","=")
+        aux_agrupa(">",i,lista,cont,">=","=")
+        aux_agrupa("!",i,lista,cont,"!=","=")
+        cont= cont+1
 
 
 def add_linha_coluna(token, linha, coluna):
     """Adiciona linha e coluna"""
     p_inicio = coluna - len(token)
     return "L:" + str(linha) + " C:(" + str(p_inicio) + "," + str(coluna) + ")"
-
-
-def conta_mais(linha, token_geral):
-    """Adiciona operadores em casos especiais"""
-    n_mais = ""
-    op = ['+', '-']
-    lista = []
-    for k in op:
-        for i in linha:
-            if i is k:
-                n_mais = n_mais + k
-            if (len(n_mais) == 2):
-                if k is "+":
-                    token_geral.append("[++]")
-                if k is "-":
-                    token_geral.append("[--]")
-                n_mais = ""
-        if n_mais is not "":
-
-            token_geral.append("[" + str(n_mais) + "]")
-            n_mais = ""
-    return 1
-
-
-def add_operadores(linha):
-    """Verifica se ocorre casos especiais na linha"""
-    grupo_op = re.search(
-        r"\+{2}|\-{2}|(\+\-)|(\-\+)|\*{2}|(\^\-)|(\^){2}", linha)
-    if grupo_op is not None:
-        return 1
-    else:
-        return 0
-
 
 def ver_iden(elemento):
     """Verifica se o elemento é um separador dos numeros"""
@@ -107,12 +58,12 @@ def ver_iden(elemento):
     else:
         return 1
 
-
 def ver_num(elemento):
     """Verifica se o elemento pertence ao grupo das constantes numericas"""
     if(re.match(r"[\d.]", elemento)):
         return 0
     else:
+        """Se ele não pertence retorna 1"""
         return 1
 
 
@@ -125,15 +76,6 @@ def verifica_reservada(token):
         cont = cont + 1
         if (token == i):
             return cont
-
-
-def verifica_contido(token, lista):
-    """Verifica se determinado token está presente em uma lista"""
-    for i in lista:
-        if token in i:
-            return 1
-    return 0
-
 
 def exibe_imprime(nome,lista):
     """escreve no arquivo de saida"""
@@ -158,18 +100,16 @@ try:
     arquivo = open(nome, "r")
 except Exception as e:
     arquivo = open("teste2.c", "r")
-
-
 for i in arquivo:
     linha = linha + 1
     coluna = 0
-    flag_linha = 0
     for k in i:
         id_tabela = (id_tabela + 1)
         coluna = coluna + 1
         if estado is 0:
             """Define o estado inicial"""
             if k is "/" and i[1] is "*" and estado == 0 and estado != 4:
+                print "entrouu"
                 estado = 4
                 token_geral.append(["/*"])
             if re.search(r"^(#)|[/]{2}", i) and estado == 0 and estado != 4:
@@ -183,21 +123,11 @@ for i in arquivo:
                 estado = 2  # Constante Numérica
             if re.match(r"[\"]", k) and estado == 0 and estado != 4:
                 estado = 3
-            if k in operadores and estado == 0 and estado != 4:
-                if flag_linha == 0:
-                    flag = conta_mais(i, token_geral)
-                    flag_linha = 1
-                if flag:
-                    estado = 0
-            if not re.search(r"[\w]|(\+)|(\-)|(\s)|(\")", k) and teste_log(i) and estado == 0 and estado != 4:
-                """Se não for um identificador valido então é um separador"""
-                token_geral.append([k])
 
-            # Ativar em caso de problemas...
-            # else:
-            #    if not teste_log(i):
-            #        if not re.search(r"\s", k):
-            #            pass
+            if ver_num(k) and ver_iden(k) and estado==0 and estado!=4:
+                """Se não for um identificador valido então é um separador"""
+                if not re.match(r"\s",k):
+                    token_geral.append([k])
 
         if estado is 1:
             """Valida Identificador"""
@@ -213,21 +143,21 @@ for i in arquivo:
 
                     token_geral.append(
                         ["Res Cod: " + str(verifica_reservada(token)), token, id_tabela])
+
                     if k is not " ":
                         token_geral.append([k])
                     token = ""
                 else:
+
                     tabela_token[id_tabela] = ["ID ", token,
                                                add_linha_coluna(token, linha, coluna)]
                     token_geral.append(
                         ["ID ", token, id_tabela])
-                    if k is not " " and not add_operadores(i):
-                        if verifica_contido(k, op_log):
-                            add_oplog(i, token_geral)
-                        else:
-                            token_geral.append([k])
-                    if teste_log(i) and k not in separadores and not add_operadores(i):
+
+                    if ver_iden(k):
+                        """Vai inserir o k como separador """
                         token_geral.append([k])
+                        estado=0
                     token = ""
 
         if estado is 2:
@@ -238,17 +168,17 @@ for i in arquivo:
                 if(re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)):
                     valor = re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)
                     if valor is not None:
-
                         tabela_token[id_tabela] = [
                             "NUM", valor.group(), add_linha_coluna(valor.group(), linha, coluna)]
 
                         token_geral.append(
                             ["NUM", valor.group(), id_tabela])
-                        if k is not " " and not add_operadores(i):
+                        if k is not " ":
                             token_geral.append([k])
                         estado = 0
                         numerico = ""
                 else:
+                    token_geral.append("[Token Inválido]")
                     lista_erros.append(
                         [numerico, add_linha_coluna(numerico, linha, coluna)])
                     numerico = ""
@@ -256,7 +186,7 @@ for i in arquivo:
             else:
                 if ver_num(k):
                     "Armazena token de separadores"
-                    if k is not " " and not add_operadores(i):
+                    if k is not " ":
                         token_geral.append([k])
                     estado = 0
 
@@ -282,6 +212,7 @@ for i in arquivo:
                 token_geral.append("[*/]")
                 estado = 0
 
+agrupa(token_geral)
 exibe_imprime("token_saida",token_geral)
 exibe_imprime("lista_erros",lista_erros)
 print "Tabela", tabela_token
