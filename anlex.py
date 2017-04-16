@@ -85,6 +85,7 @@ def ver_num(elemento):
     if(re.match(r"[\d.]", elemento)):
         return 0
     else:
+        """Se ele não pertence retorna 1"""
         return 1
 
 
@@ -128,7 +129,7 @@ for i in arquivo:
     flag_linha = 0
     cont=0
     for k in i:
-        print "Letra", k, cont
+        #print "Letra", k, cont
         cont = cont+1
         id_tabela = (id_tabela + 1)
         coluna = coluna + 1
@@ -150,20 +151,9 @@ for i in arquivo:
             if re.match(r"[\"]", k) and estado == 0 and estado != 4:
                 estado = 3
 
-            if k is '/':
-                token_geral.append("[/]")
-                estado = 0
-
-            if k in operadores:
+            if ver_num(k) and ver_iden(k) and estado==0 and estado!=4:
                 """Se não for um identificador valido então é um separador"""
                 token_geral.append([k])
-                # Ativar em caso de problemas...
-            else:
-                if k is "=":
-                    print k,i[cont-1]
-                    if(cont-1)>0:
-                        if k is i[cont-1]:
-                            token_geral.append("[/p==]")
 
 
         if estado is 1:
@@ -192,7 +182,6 @@ for i in arquivo:
                     if teste_log(i):
                         """Vai inserir o k como separador """
                         #print "Sep", k
-                        print "kkk"
                         token_geral.append([k])
                         estado=0
                     else:
