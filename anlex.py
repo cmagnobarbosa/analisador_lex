@@ -112,13 +112,12 @@ for i in arquivo:
     for k in i:
         id_tabela = (id_tabela + 1)
         coluna = coluna + 1
-
         if estado is 0:
             """Define o estado inicial"""
-            if k is "/" and i[1] is "*" and estado == 0 and estado != 4:
+            if k is "/" and i[coluna] is "*" and estado == 0 and estado != 4:
                 """Comentario"""
                 estado = 4
-                token_geral.append(["/*"])
+                token_geral.append(["*/"])
             if re.search(r"^(#)|[/]{2}", i) and estado == 0 and estado != 4:
                 """ignora o stdio e linha comentada"""
                 break
