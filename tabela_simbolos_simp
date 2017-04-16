@@ -1,3 +1,9 @@
 Tabela de Simbolos
-Chave:2 ['NUM', '1', 'L:1 C:(1,2)']
-Chave:4 ['ID ', 'b', 'L:1 C:(3,4)']
+Chave:4 ['Res Cod: 7', 'for', 'L:1 C:(1,4)']
+Chave:7 ['ID ', 'd', 'L:1 C:(6,7)']
+Chave:9 ['NUM', '0', 'L:1 C:(8,9)']
+Chave:14 ['NUM', '7', 'L:1 C:(13,14)']
+Chave:16 ['ID ', 'c', 'L:1 C:(15,16)']
+Chave:30 ['Res Cod: 6', 'printf', 'L:2 C:(3,9)']
+Chave:36 ['Literal', '"%s', 'L:2 C:(12,15)']
+Chave:39 ['ID ', 'd', 'L:2 C:(17,18)']
