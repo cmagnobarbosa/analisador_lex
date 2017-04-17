@@ -12,8 +12,8 @@ import re
 token = ""
 numerico = ""
 estado = 0
-#separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.']
-#operadores = ['-', '+', '/', '*', '^']
+separadores = [';', '[', ']', ')', '(', ')', '{', '}', ',', '=', '.']
+operadores = ['-', '+', '/', '*', '^']
 lista_erros = []
 token_geral = []
 tabela_token = {}
@@ -170,6 +170,7 @@ for i in arquivo:
             """Estado de indentificacao de constante numerica"""
             if re.match(r"[\w.]", k):
                 numerico = numerico + k
+                #print "numerico ",numerico
             if ver_num(k):
                 if(re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)):
                     valor = re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)
@@ -184,11 +185,13 @@ for i in arquivo:
                         estado = 0
                         numerico = ""
                 else:
-                    token_geral.append("[Token Inválido]")
-                    lista_erros.append(
-                        [numerico, add_linha_coluna(numerico, linha, coluna)])
-                    numerico = ""
-                    estado = 0
+                    if k in separadores or re.match(r"\s|\n",k) or k in operadores:
+                        """Identifica o token inválido"""
+                        token_geral.append("[Token Inválido]")
+                        lista_erros.append(
+                            [numerico, add_linha_coluna(numerico, linha, coluna)])
+                        numerico = ""
+                        estado = 0
             else:
                 if ver_num(k):
                     "Armazena token de separadores"
@@ -220,7 +223,7 @@ for i in arquivo:
 
 agrupa(token_geral)
 exibe_imprime("token_saida",token_geral)
-exibe_imprime("lista_erros",lista_erros)
+print "Erros ",exibe_imprime("lista_erros",lista_erros)
 lista_erros=[]
 print "Tabela", tabela_token
 imprime_tabela(tabela_token)

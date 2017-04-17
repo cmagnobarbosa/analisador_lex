@@ -1,3 +1,4 @@
 /*
-Analisador
-/*
+Algum comentário
+
+*/
