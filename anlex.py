@@ -22,28 +22,30 @@ coluna = 0
 id_tabela = 0
 acumula = ""
 
-def aux_agrupa(elemento,i,lista,cont,elemento_double,next_elemento):
+
+def aux_agrupa(elemento, i, lista, cont, elemento_double, next_elemento):
     """Auxilia a função que agrupa"""
     if elemento in i:
-        if next_elemento in lista[cont+1]:
-            lista.pop(cont+1)
-            lista.insert(cont,[elemento_double])
-            lista.pop(cont+1)
+        if next_elemento in lista[cont + 1]:
+            lista.pop(cont + 1)
+            lista.insert(cont, [elemento_double])
+            lista.pop(cont + 1)
+
 
 def agrupa(lista):
     """Agrupa os elementos na lista"""
-    cont =0
-    #print lista
+    cont = 0
+    # print lista
     for i in lista:
-        aux_agrupa("+",i,lista,cont,"++","+")
-        aux_agrupa("-",i,lista,cont,"--","-")
-        aux_agrupa("=",i,lista,cont,"==","=")
-        aux_agrupa("&",i,lista,cont,"&&","&")
-        aux_agrupa("|",i,lista,cont,"||","|")
-        aux_agrupa("<",i,lista,cont,"<=","=")
-        aux_agrupa(">",i,lista,cont,">=","=")
-        aux_agrupa("!",i,lista,cont,"!=","=")
-        cont= cont+1
+        aux_agrupa("+", i, lista, cont, "++", "+")
+        aux_agrupa("-", i, lista, cont, "--", "-")
+        aux_agrupa("=", i, lista, cont, "==", "=")
+        aux_agrupa("&", i, lista, cont, "&&", "&")
+        aux_agrupa("|", i, lista, cont, "||", "|")
+        aux_agrupa("<", i, lista, cont, "<=", "=")
+        aux_agrupa(">", i, lista, cont, ">=", "=")
+        aux_agrupa("!", i, lista, cont, "!=", "=")
+        cont = cont + 1
 
 
 def add_linha_coluna(token, linha, coluna):
@@ -51,12 +53,14 @@ def add_linha_coluna(token, linha, coluna):
     p_inicio = coluna - len(token)
     return "L:" + str(linha) + " C:(" + str(p_inicio) + "," + str(coluna) + ")"
 
+
 def ver_iden(elemento):
     """Verifica se o elemento é um separador dos numeros"""
     if(re.match(r"[\w]", elemento)):
         return 0
     else:
         return 1
+
 
 def ver_num(elemento):
     """Verifica se o elemento pertence ao grupo das constantes numericas"""
@@ -66,8 +70,10 @@ def ver_num(elemento):
         """Se ele não pertence retorna 1"""
         return 1
 
+
 def verifica_reservada(token):
-    """Verifica se determinado token é reservado e retorna um código para o mesmo"""
+    """Verifica se determinado token é
+    reservado e retorna um código para o mesmo"""
     reservada_list = ['int', 'float', 'char', 'if', 'else', 'printf',
                       'for', 'while', 'return', 'continue', 'break', 'read']
     cont = 0
@@ -76,10 +82,11 @@ def verifica_reservada(token):
         if (token == i):
             return cont
 
-def exibe_imprime(nome,lista):
+
+def exibe_imprime(nome, lista):
     """escreve no arquivo de saida"""
     arq = open(nome, "w")
-    if(len(lista)==0):
+    if(len(lista) == 0):
         arq.write("Lista vazia\n")
     for i in lista:
         print i
@@ -88,13 +95,15 @@ def exibe_imprime(nome,lista):
 
     arq.close()
 
+
 def imprime_tabela(tabela_token):
-    "Imprime a tabela de tokens"
+    """Imprime a tabela de tokens"""
     arq_tabela = open("tabela_simbolos_simp", "w")
     arq_tabela.write("Tabela de Simbolos\n")
     for i in sorted(tabela_token):
         arq_tabela.write("Chave:" + str(i) + " " + str(tabela_token[i]) + "\n")
     arq_tabela.close()
+
 
 def open_file():
     """Abre o arquivo de entrada"""
@@ -105,7 +114,7 @@ def open_file():
         arquivo = open("teste2.c", "r")
     return arquivo
 
-arquivo= open_file()
+arquivo = open_file()
 for i in arquivo:
     linha = linha + 1
     coluna = 0
@@ -130,9 +139,9 @@ for i in arquivo:
             if re.match(r"[\"]", k) and estado == 0 and estado != 4:
                 estado = 3
 
-            if ver_num(k) and ver_iden(k) and estado==0 and estado!=4:
+            if ver_num(k) and ver_iden(k) and estado == 0 and estado != 4:
                 """Se não for um identificador valido então é um separador"""
-                if not re.match(r"\s",k):
+                if not re.match(r"\s", k):
                     token_geral.append([k])
 
         if estado is 1:
@@ -163,14 +172,14 @@ for i in arquivo:
                     if ver_iden(k):
                         """Vai inserir o k como separador """
                         token_geral.append([k])
-                        estado=0
+                        estado = 0
                     token = ""
 
         if estado is 2:
             """Estado de indentificacao de constante numerica"""
             if re.match(r"[\w.]", k):
                 numerico = numerico + k
-                #print "numerico ",numerico
+                # print "numerico ",numerico
             if ver_num(k):
                 if(re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)):
                     valor = re.match(r"(^[0-9]*$|[0-9]+.[0-9]+)", numerico)
@@ -185,7 +194,7 @@ for i in arquivo:
                         estado = 0
                         numerico = ""
                 else:
-                    if k in separadores or re.match(r"\s|\n",k) or k in operadores:
+                    if k in separadores or re.match(r"\s|\n", k) or k in operadores:
                         """Identifica o token inválido"""
                         token_geral.append("[Token Inválido]")
                         lista_erros.append(
@@ -222,9 +231,9 @@ for i in arquivo:
                 estado = 0
 
 agrupa(token_geral)
-exibe_imprime("token_saida",token_geral)
-print "Erros ",exibe_imprime("lista_erros",lista_erros)
-lista_erros=[]
+exibe_imprime("token_saida", token_geral)
+print "Erros ", exibe_imprime("lista_erros", lista_erros)
+lista_erros = []
 print "Tabela", tabela_token
 imprime_tabela(tabela_token)
 print "Comentário:", acumula
