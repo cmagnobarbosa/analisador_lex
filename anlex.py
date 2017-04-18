@@ -22,14 +22,29 @@ coluna = 0
 id_tabela = 0
 acumula = ""
 
+def verifica_erro(elemento,token_geral,lista_erros,linha,coluna):
+    """Se não encontrar um erro retorna 1"""
+    separadores = [';', '[', ']', ')', '(', ')', '{', '}',
+    ',', '=', '.','-', '+', '/', '*', '^','!','&','|','>','<']
+    if not re.match("[\w]",elemento):
+        if elemento not in separadores:
+            if not re.search(r"\s",elemento):
+                token_geral.append("[Token Inválido]")
+                lista_erros.append(
+                    [elemento, add_linha_coluna(elemento, linha, coluna)])
+            return 0
+    return 1
+
+
 
 def aux_agrupa(elemento, i, lista, cont, elemento_double, next_elemento):
     """Auxilia a função que agrupa"""
     if elemento in i:
-        if next_elemento in lista[cont + 1]:
-            lista.pop(cont + 1)
-            lista.insert(cont, [elemento_double])
-            lista.pop(cont + 1)
+        if (cont+1)<len(lista):
+            if next_elemento in lista[cont + 1]:
+                lista.pop(cont + 1)
+                lista.insert(cont, [elemento_double])
+                lista.pop(cont + 1)
 
 
 def agrupa(lista):
@@ -141,7 +156,7 @@ for i in arquivo:
 
             if ver_num(k) and ver_iden(k) and estado == 0 and estado != 4:
                 """Se não for um identificador valido então é um separador"""
-                if not re.match(r"\s", k):
+                if verifica_erro(k,token_geral,lista_erros,linha,coluna):
                     token_geral.append([k])
 
         if estado is 1:
@@ -160,7 +175,8 @@ for i in arquivo:
                         ["Res Cod: " + str(verifica_reservada(token)), token, id_tabela])
 
                     if k is not " ":
-                        token_geral.append([k])
+                        if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                            token_geral.append([k])
                     token = ""
                 else:
 
@@ -170,8 +186,12 @@ for i in arquivo:
                         ["ID ", token, id_tabela])
 
                     if ver_iden(k):
+
                         """Vai inserir o k como separador """
-                        token_geral.append([k])
+                        if k is not re.match(r"\s",k):
+                            if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                                """Se não encontrar um erro insere"""
+                                token_geral.append([k])
                         estado = 0
                     token = ""
 
@@ -190,7 +210,8 @@ for i in arquivo:
                         token_geral.append(
                             ["NUM", valor.group(), id_tabela])
                         if k is not " ":
-                            token_geral.append([k])
+                            if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                                token_geral.append([k])
                         estado = 0
                         numerico = ""
                 else:
@@ -205,7 +226,8 @@ for i in arquivo:
                 if ver_num(k):
                     "Armazena token de separadores"
                     if k is not " ":
-                        token_geral.append([k])
+                        if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                            token_geral.append([k])
                     estado = 0
 
         if estado is 3:

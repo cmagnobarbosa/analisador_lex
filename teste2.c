@@ -10,6 +10,7 @@ int main() {
   float a=7.77;
   for(d=0;d<10;d++){
     printf("%d\n",d);
+      $
   }
   return 0;
 }
