@@ -1,5 +1,2 @@
-/*
-Algum comentário
-
-*/
-9@0
+// int
+float
