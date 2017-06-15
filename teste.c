@@ -1,2 +1,2 @@
 // int
-float
+a=(3+5)*alpha

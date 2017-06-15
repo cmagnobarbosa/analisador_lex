@@ -7,7 +7,7 @@ UFSJ
 """
 import sys
 import re
-
+from analisador_sintatico_expressao_aritmetica import Sintatico
 
 token = ""
 numerico = ""
@@ -22,13 +22,14 @@ coluna = 0
 id_tabela = 0
 acumula = ""
 
-def verifica_erro(elemento,token_geral,lista_erros,linha,coluna):
+
+def verifica_erro(elemento, token_geral, lista_erros, linha, coluna):
     """Se não encontrar um erro retorna 1"""
     separadores = [';', '[', ']', ')', '(', ')', '{', '}',
-    ',', '=', '.','-', '+', '/', '*', '^','!','&','|','>','<']
-    if not re.match("[\w]",elemento):
+                   ',', '=', '.', '-', '+', '/', '*', '^', '!', '&', '|', '>', '<']
+    if not re.match("[\w]", elemento):
         if elemento not in separadores:
-            if not re.search(r"\s",elemento):
+            if not re.search(r"\s", elemento):
                 token_geral.append("[Token Inválido]")
                 lista_erros.append(
                     [elemento, add_linha_coluna(elemento, linha, coluna)])
@@ -36,11 +37,10 @@ def verifica_erro(elemento,token_geral,lista_erros,linha,coluna):
     return 1
 
 
-
 def aux_agrupa(elemento, i, lista, cont, elemento_double, next_elemento):
     """Auxilia a função que agrupa"""
     if elemento in i:
-        if (cont+1)<len(lista):
+        if (cont + 1) < len(lista):
             if next_elemento in lista[cont + 1]:
                 lista.pop(cont + 1)
                 lista.insert(cont, [elemento_double])
@@ -156,7 +156,7 @@ for i in arquivo:
 
             if ver_num(k) and ver_iden(k) and estado == 0 and estado != 4:
                 """Se não for um identificador valido então é um separador"""
-                if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                if verifica_erro(k, token_geral, lista_erros, linha, coluna):
                     token_geral.append([k])
 
         if estado is 1:
@@ -175,7 +175,7 @@ for i in arquivo:
                         ["Res Cod: " + str(verifica_reservada(token)), token, id_tabela])
 
                     if k is not " ":
-                        if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                        if verifica_erro(k, token_geral, lista_erros, linha, coluna):
                             token_geral.append([k])
                     token = ""
                 else:
@@ -188,8 +188,8 @@ for i in arquivo:
                     if ver_iden(k):
 
                         """Vai inserir o k como separador """
-                        if k is not re.match(r"\s",k):
-                            if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                        if k is not re.match(r"\s", k):
+                            if verifica_erro(k, token_geral, lista_erros, linha, coluna):
                                 """Se não encontrar um erro insere"""
                                 token_geral.append([k])
                         estado = 0
@@ -210,7 +210,7 @@ for i in arquivo:
                         token_geral.append(
                             ["NUM", valor.group(), id_tabela])
                         if k is not " ":
-                            if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                            if verifica_erro(k, token_geral, lista_erros, linha, coluna):
                                 token_geral.append([k])
                         estado = 0
                         numerico = ""
@@ -226,7 +226,7 @@ for i in arquivo:
                 if ver_num(k):
                     "Armazena token de separadores"
                     if k is not " ":
-                        if verifica_erro(k,token_geral,lista_erros,linha,coluna):
+                        if verifica_erro(k, token_geral, lista_erros, linha, coluna):
                             token_geral.append([k])
                     estado = 0
 
@@ -252,10 +252,14 @@ for i in arquivo:
                 token_geral.append("[*/]")
                 estado = 0
 
-agrupa(token_geral)
-exibe_imprime("token_saida", token_geral)
-print "Erros ", exibe_imprime("lista_erros", lista_erros)
-lista_erros = []
-print "Tabela", tabela_token
-imprime_tabela(tabela_token)
-print "Comentário:", acumula
+if __name__ == '__main__':
+    sin = Sintatico()
+    agrupa(token_geral)
+    #exibe_imprime("token_saida", token_geral)
+    # print token_geral
+    sin.conector(token_geral)
+    # print "Erros ", exibe_imprime("lista_erros", lista_erros)
+    lista_erros = []
+    print "Tabela", tabela_token
+    imprime_tabela(tabela_token)
+    # print "Comentário:", acumula
