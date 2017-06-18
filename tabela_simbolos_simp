@@ -1,5 +1,3 @@
 Tabela de Simbolos
-Chave:3 ['ID ', 'a', 'L:2 C:(1,2)']
-Chave:6 ['NUM', '3', 'L:2 C:(4,5)']
-Chave:8 ['NUM', '5', 'L:2 C:(6,7)']
-Chave:15 ['ID ', 'alpha', 'L:2 C:(9,14)']
+Chave:5 ['Res Cod: 1', 'int', 'L:2 C:(1,4)']
+Chave:7 ['ID ', 'a', 'L:2 C:(5,6)']

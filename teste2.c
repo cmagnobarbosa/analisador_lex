@@ -5,7 +5,8 @@ Arquivo de teste
 */
 
 int main() {
-  int a =8;
-  printf("%d",a/2);
+  int INT=8,IF=0;
+  printf("%d",INT+IF);
+  printf("%d",INT/2);
   return 0;
 }
