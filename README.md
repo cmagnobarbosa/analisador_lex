@@ -1,3 +1,9 @@
+
+# analisador Sintático
+
+O analisador sinático utiliza uma grámatica resumida.
+
+
 # analisador_lex
 Analisador Lexico - Compiladores UFSJ
 - Carlos Magno

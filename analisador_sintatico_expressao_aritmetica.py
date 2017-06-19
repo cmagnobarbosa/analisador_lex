@@ -130,27 +130,45 @@ class Sintatico(object):
 
         return pos
 
+    def valido(self):
+        print "Leitura Completa - Válido"
+        return 0
+
     def programa(self):
         """Função programa"""
+        # print "Pos Global ", self.pos_global
         retorno = self.get_next_token(self.tokens, self.pos_global)
         simb = retorno[0]
         pos = retorno[1]
         print "First PROG ", simb
         if(simb is "$"):
             """Final da leitura"""
-            print "Leitura Completa - Válido"
+            self.valido()
         if(simb in self.tipo):
-            self.declaracao(pos)
+            """Válida uma declaração"""
+            ret_pos = self.declaracao(pos)
+            retorno = self.get_next_token(self.tokens, ret_pos - 1)
+            simb = retorno[0]
+            pos = retorno[1]
+            if(simb is not "$"):
+                self.pos_global = pos
+                self.programa()
+            else:
+                print "Leitura Completa - Válido"
+                return 0
+
         elif ("ID" in simb):
             """Válida uma Atribuição"""
             ret_pos = self.atribuicao(pos)
             retorno = self.get_next_token(self.tokens, ret_pos)
             simb = retorno[0]
             pos = retorno[1]
-            if(simb is not ";"):
+            if(simb in "$"):
+                print "Leitura Completa - Válido"
+                return 0
+            elif(simb is not ";"):
                 print "Erro Faltando ; Posição", simb, pos
-            elif(simb is "$"):
-                print "leitura completa - valido"
+                print self.tokens[ret_pos]
             self.pos_global = pos
             self.programa()
         elif ("while" in simb):
@@ -169,15 +187,36 @@ class Sintatico(object):
                 retorno = self.get_next_token(self.tokens, pos)
                 simb = retorno[0]
                 pos = retorno[1]
+                print "Atribuição Válida"
                 return self.E(simb, self.tokens, pos)
 
     def declaracao(self, pos):
-        print "Declaracao "
-        pass
+        """Verifica a declaracao"""
+        # print "Declaracao ", self.tokens[pos]
+
+        simb = self.tokens[pos]
+        if(simb in self.tipo):
+            """Verifica se simolo é int, float ou char."""
+            retorno = self.get_next_token(self.tokens, pos)
+            simb = retorno[0]
+            pos = retorno[1]
+            if(simb in " ID "):
+                retorno = self.get_next_token(self.tokens, pos)
+                simb = retorno[0]
+                pos = retorno[1]
+                if(simb is ";"):
+                    print "Declaração Válida."
+                    return pos
+                else:
+                    self.pos_global = pos - 2
+                    # print self.tokens[pos - 2]
+                    return pos - 2
+            else:
+                print "Token ", simb, "Pos ", pos
 
     def conector(self, lista):
         """Realiza a ponte de conexão entre o Analisador Lexico e o Sintático"""
-        print "Entrada Sintático ", lista
+        # print "Entrada Sintático ", lista
         cont = 0
         for i in lista:
             cont = cont + 1
@@ -185,10 +224,9 @@ class Sintatico(object):
                 self.tokens.append(i[0])
             elif("Res" in i[0]):
                 self.tokens.append(i[1])
-                print self.tokens
             else:
                 self.tokens.append(i[0])
         self.tokens.append("$")
-        print self.tokens
+        print "Entada Sintático ", self.tokens
         self.programa()
         # self.E(self.tokens[0], self.tokens, 0)
