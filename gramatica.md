@@ -1,5 +1,10 @@
 # analisador Sintático
 
+ a = 8 +8
+
+ ID = NUM + NUM
+
+
 Gramática
 
 Programa -> **Declaracao**|**Atribuicao**|**Condicao**|**Repeticao**|$
@@ -16,7 +21,11 @@ int|float|char
 Repeticao ->
 while(**Expressao**){**Bloco**};|**Programa**
 
-Expressao -> (**Expressao**);|**Programa**
+Expressao -> (**Expressao_aritmetico**);|(**Expressao_logica**);|**Programa**
+
+Expressao_aritmetico ->
+
+Expressao_logica ->
 
 condicao -> if(**Expressao**){**Bloco**};|**Programa**
 

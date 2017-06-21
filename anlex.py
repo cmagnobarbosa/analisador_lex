@@ -256,7 +256,7 @@ if __name__ == '__main__':
     agrupa(token_geral)
     #exibe_imprime("token_saida", token_geral)
     # print token_geral
-    sin.conector(token_geral)
+    sin.conector(token_geral, tabela_token)
     # print "Erros ", exibe_imprime("lista_erros", lista_erros)
     lista_erros = []
     print "Tabela", tabela_token

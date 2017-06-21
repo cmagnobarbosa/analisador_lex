@@ -13,6 +13,8 @@ class Sintatico(object):
 
     def __init__(self):
         self.tokens = []
+        self.lista = []
+        self.tabela = []
         self.elemento = ["NUM", "ID", "Literal"]
         self.tipo = ["int", "float", "char"]
         self.pos_global = -1
@@ -46,32 +48,33 @@ class Sintatico(object):
 
         if(simb == "("):
 
-            retorno = self.get_next_token(lista, pos)
-            simb = retorno[0]
-            pos = retorno[1]
+            simb, pos = self.get_next_token(lista, pos)
             return self.E(simb, lista, pos)
             if(simb != ")"):
                 # print "Erro Caracter Posicao F ", pos
                 exit()
         elif(simb in self.elemento):
-            retorno = self.get_next_token(lista, pos)
-            simb = retorno[0]
-            pos = retorno[1]
+            simb, pos = self.get_next_token(lista, pos)
             return self.Elinha(simb, lista, pos)
 
         else:
             print "Erro Caracter Posicao ", pos, simb
-            exit()
+            return pos
         return pos
 
     def get_next_token(self, lista, pos):
         """Puxa o proximo token"""
         """Retorna o elemento e a sua posicao"""
-        pos += 1
+        # print "Valor ", pos, type(pos)
+
         # print lista[pos]
+        pos += 1
         try:
             return lista[pos], pos
         except Exception as e:
+            if(lista[pos - 1] in " $ "):
+                print "Leitura completa - Verifique os erros encontrados."
+                exit()
             print "Erro Caracter", lista[pos - 1], "Posicao ", pos
             print "Estouro da pilha de Recursão ..."\
                 "Último simbolo válido", lista[pos - 1]
@@ -86,9 +89,7 @@ class Sintatico(object):
     def Elinha(self, simb, lista, pos):
         """Válida adição e subtração."""
         if(simb == "+"):
-            retorno = self.get_next_token(lista, pos)
-            simb = retorno[0]
-            pos = retorno[1]
+            simb, pos = self.get_next_token(lista, pos)
             return self.T(simb, lista, pos)
             # Elinha(simb, lista, pos)
         elif (simb == ")" or simb == ";"):
@@ -96,9 +97,7 @@ class Sintatico(object):
             return pos
 
         elif (simb == "-"):
-            retorno = self.get_next_token(lista, pos)
-            simb = retorno[0]
-            pos = retorno[1]
+            simb, pos = self.get_next_token(lista, pos)
             # print "simbolo2 ", simb, pos
             return self.T(simb, lista, pos)
         else:
@@ -111,16 +110,12 @@ class Sintatico(object):
         """Válida multiplicação"""
         # print"Elinha ", simb, pos
         if(simb == "*"):
-            retorno = self.get_next_token(lista, pos)
-            simb = retorno[0]
-            pos = retorno[1]
+            simb, pos = self.get_next_token(lista, pos)
             # print "simbolo2 ", simb, pos
             return self.F(simb, lista, pos)
             return self.Tlinha(simb, lista, pos)
         elif(simb == "/"):
-            retorno = self.get_next_token(lista, pos)
-            simb = retorno[0]
-            pos = retorno[1]
+            simb, pos = self.get_next_token(lista, pos)
             return self.F(simb, lista, pos)
         elif (simb == ")" or simb == ";"):
             print "Expressão Válida"
@@ -131,54 +126,73 @@ class Sintatico(object):
         return pos
 
     def valido(self):
-        print "Leitura Completa - Válido"
+        print "Leitura Completa."
         return 0
+
+    def erro(self, simb, pos):
+        """Indica que ocorreu um erro"""
+        print "Erro Caracter ", simb, " Posição ", pos
+        try:
+            print "Linha Coluna", self.tabela[self.lista[pos - 1][2]][2]
+            return pos
+        except Exception as e:
+            print "erro"
+
+        return pos
 
     def programa(self):
         """Função programa"""
         # print "Pos Global ", self.pos_global
-        retorno = self.get_next_token(self.tokens, self.pos_global)
-        simb = retorno[0]
-        pos = retorno[1]
+        simb, pos = self.get_next_token(self.tokens, self.pos_global)
         print "First PROG ", simb
         if(simb is "$"):
             """Final da leitura"""
-            self.valido()
-        if(simb in self.tipo):
+            return self.valido()
+        elif(simb in self.tipo):
             """Válida uma declaração"""
             ret_pos = self.declaracao(pos)
-            retorno = self.get_next_token(self.tokens, ret_pos - 1)
-            simb = retorno[0]
-            pos = retorno[1]
-            if(simb is not "$"):
+            simb = self.tokens[ret_pos]
+            simb, pos = self.get_next_token(self.tokens, ret_pos)
+            if(simb not in " $ "):
+                print "programa", pos
                 self.pos_global = pos
-                self.programa()
-            else:
-                print "Leitura Completa - Válido"
-                return 0
+                return self.programa()
+            elif(simb in " $ "):
+                return self.valido()
+            if(simb not in " ; "):
+                print simb
+                return self.erro(simb, pos)
 
         elif ("ID" in simb):
             """Válida uma Atribuição"""
             ret_pos = self.atribuicao(pos)
-            retorno = self.get_next_token(self.tokens, ret_pos)
-            simb = retorno[0]
-            pos = retorno[1]
+            sim, pos = self.get_next_token(self.tokens, ret_pos)
             if(simb in "$"):
-                print "Leitura Completa - Válido"
-                return 0
-            elif(simb is not ";"):
-                print "Erro Faltando ; Posição", simb, pos
-                print self.tokens[ret_pos]
+                return self.valido
+            # elif(simb is not ";"):
+            #     print "Erro Faltando ; Posição", simb, pos
+            #     print self.tokens[ret_pos]
             self.pos_global = pos
-            self.programa()
+            return self.programa()
         elif ("while" in simb):
-            pass
+            """Válida a estrutura de repetição while"""
+            ret_pos = self.repeticao(pos)
+            self.pos_global = ret_pos
+            self.programa()
         elif ("if" in simb):
+            """Valida a estrutura condicional"""
+
             pass
+        else:
+            print self.tokens[pos + 1]
+            print simb
+            # print "Simbolo ", simb, pos
+            return pos
 
     def atribuicao(self, pos):
         """Válida uma atribuicao"""
         simb = self.tokens[pos]
+        print "Simbolo ", simb
         if("ID" in simb):
             retorno = self.get_next_token(self.tokens, pos)
             simb = retorno[0]
@@ -189,6 +203,8 @@ class Sintatico(object):
                 pos = retorno[1]
                 print "Atribuição Válida"
                 return self.E(simb, self.tokens, pos)
+            else:
+                return self.erro(simb, pos)
 
     def declaracao(self, pos):
         """Verifica a declaracao"""
@@ -208,15 +224,47 @@ class Sintatico(object):
                     print "Declaração Válida."
                     return pos
                 else:
-                    self.pos_global = pos - 2
-                    # print self.tokens[pos - 2]
-                    return pos - 2
+                    return self.atribuicao(pos - 1)
+                    # self.pos_global = pos - 2
+                    # # print self.tokens[pos - 2]
+                    # return pos - 2
             else:
-                print "Token ", simb, "Pos ", pos
+                pass
+                # return self.erro()
 
-    def conector(self, lista):
+    def repeticao(self, pos):
+        """Define a estrutura de repeticao"""
+        simb = self.tokens[pos]
+        if(simb in "while"):
+            simb, pos = self.get_next_token(self.tokens, pos)
+            ret_pos = self.E(simb, self.tokens, pos)
+            simb, pos = self.get_next_token(self.tokens, ret_pos)
+            if(simb in "$"):
+                print "Leitura Completa - Válido"
+                return pos
+            elif("{" in simb):
+                simb, pos = self.get_next_token(self.tokens, pos)
+                self.pos_global = pos - 1
+                ret_pos = self.bloco()
+                simb = self.tokens[ret_pos]
+                if("}" in simb):
+                    simb, pos = self.get_next_token(self.tokens, ret_pos)
+                    if(";" in simb):
+                        print "While válido"
+                        return pos
+                else:
+                    self.erro(simb, pos)
+
+    def bloco(self):
+        return self.programa()
+
+    def conector(self, lista, tabela):
         """Realiza a ponte de conexão entre o Analisador Lexico e o Sintático"""
         # print "Entrada Sintático ", lista
+        # print lista
+        self.lista = lista
+        self.tabela = tabela
+        print "Tabela ", tabela
         cont = 0
         for i in lista:
             cont = cont + 1
@@ -227,6 +275,12 @@ class Sintatico(object):
             else:
                 self.tokens.append(i[0])
         self.tokens.append("$")
-        print "Entada Sintático ", self.tokens
-        self.programa()
+        print "Entrada Sintático ", self.tokens
+
+        retorno_final = self.programa()
+        if(retorno_final is 0 or retorno_final is None):
+            print "Retorno sem erros"
+        else:
+            print retorno_final
+            print "Leitura Completa - Verifique erros"
         # self.E(self.tokens[0], self.tokens, 0)
