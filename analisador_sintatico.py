@@ -27,7 +27,7 @@ class Sintatico(object):
         if(simb in " NUM " or simb in " ID " or simb in "Literal" or simb == "("):
             return self.T(simb, lista, pos)
             return self.Elinha(simb, lista, pos)
-            retutn self.logicos(simb, lista, pos)
+            return self.logicos(simb, lista, pos)
         else:
             # print "Erro Caracter Posição ", pos, simb
             self.erro(simb, pos)
@@ -36,7 +36,11 @@ class Sintatico(object):
         return pos
 
     def logicos(self, simb, lista, pos):
-        pass
+        print "entrou"
+        if(simb is ">" or simb is "<"):
+            return self.T(simb, lista, pos)
+        else:
+            return pos
 
     def T(self, simb, lista, pos):
 
@@ -45,6 +49,7 @@ class Sintatico(object):
             return self.F(simb, lista, pos)
             return self.Tlinha(simb, lista, pos)
         else:
+
             # Elinha(simb, lista, pos)
             # print "simboloT ", simb, pos
             # print "Erro Caracter Posicao", pos, simb
@@ -67,6 +72,7 @@ class Sintatico(object):
             return self.Elinha(simb, lista, pos)
 
         else:
+
             # print "Erro Caracter Posicao", pos, simb
             self.erro(simb, pos)
             self.indica_erro = 1
@@ -119,6 +125,7 @@ class Sintatico(object):
         else:
             if(not(simb in " NUM " or simb in " ID " or simb in "Literal")):
                 # print "Erro Caracter Posicao ", pos, simb
+                print "fora"
                 self.erro(simb, pos)
                 self.indica_erro = 1
 
@@ -186,10 +193,35 @@ class Sintatico(object):
             ret_pos = self.repeticao(pos)
             self.pos_global = ret_pos
             self.programa()
-        elif ("if" in simb):
+        elif (simb in " if "):
             """Valida a estrutura condicional"""
-            pass
+            simb, pos = self.get_next_token(self.tokens, pos)
+            pos = self.condicional(pos)
+
         else:
+            # print simb
+            return pos
+
+    def condicional(self, pos):
+        """Valida um  condicao"""
+        simb = self.tokens[pos]
+        pos = self.E(simb, self.tokens, pos)
+        simb, pos = self.get_next_token(self.tokens, pos)
+        if(simb in " { "):
+
+            self.pos_global = pos
+            pos = self.programa()
+            simb = self.tokens[pos]
+            if(simb in " } "):
+                simb, pos = self.get_next_token(self.tokens, pos)
+                if(simb in " ; "):
+                    print "Condicional Correto"
+                else:
+                    self.erro(simb, pos)
+                    return pos
+
+        else:
+            self.erro(simb, pos)
             return pos
 
     def atribuicao_virgula(self, pos):
@@ -219,12 +251,16 @@ class Sintatico(object):
                 pos = self.E(simb, self.tokens, pos)
                 simb, pos = self.get_next_token(self.tokens, pos)
                 if(simb is not ";" and simb is not "$"):
-                    self.erro(simb, pos)
-                    self.indica_erro = 1
-                return pos
+                    self.pos_global = pos - 1
+                    pos = self.programa()
+                    return pos
+                    # self.erro(simb, pos)
+                    # self.indica_erro = 1
+                # return pos
             elif("," in simb):
                 return self.atribuicao_virgula(pos)
             else:
+
                 return self.erro(simb, pos)
         else:
             print "Simbolo", simb
@@ -256,25 +292,28 @@ class Sintatico(object):
     def repeticao(self, pos):
         """Define a estrutura de repeticao"""
         simb = self.tokens[pos]
-        print "while"
+        # print "while"
         if(simb in "while"):
             simb, pos = self.get_next_token(self.tokens, pos)
-            ret_pos = self.E(simb, self.tokens, pos)
-            simb, pos = self.get_next_token(self.tokens, ret_pos)
+            pos = self.E(simb, self.tokens, pos)
+            simb, pos = self.get_next_token(self.tokens, pos)
             if(simb in "$"):
                 print "Leitura Completa - Válido"
                 return pos
             elif("{" in simb):
+                print "aqui"
                 simb, pos = self.get_next_token(self.tokens, pos)
-                self.pos_global = pos - 1
+                self.pos_global = pos
                 ret_pos = self.bloco()
-                simb = self.tokens[ret_pos]
+                simb = self.tokens[ret_pos - 2]
                 if("}" in simb):
-                    simb, pos = self.get_next_token(self.tokens, ret_pos)
+
+                    simb, pos = self.get_next_token(self.tokens, ret_pos - 2)
                     if(";" in simb):
                         print "While válido"
                         return pos
                 else:
+                    print "erro"
                     self.erro(simb, pos)
 
     def bloco(self):

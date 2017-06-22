@@ -7,7 +7,7 @@ UFSJ
 """
 import sys
 import re
-from analisador_sintatico_expressao_aritmetica import Sintatico
+from analisador_sintatico import Sintatico
 token = ""
 numerico = ""
 estado = 0
