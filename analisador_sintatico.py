@@ -243,10 +243,13 @@ class Sintatico(object):
         """Válida uma atribuicao"""
         simb = self.tokens[pos]
         # print simb
+
         if("ID" in simb):
             simb, pos = self.get_next_token(self.tokens, pos)
+
             if("=" in simb):
                 simb, pos = self.get_next_token(self.tokens, pos)
+
                 print "Atribuição Válida"
                 pos = self.E(simb, self.tokens, pos)
                 simb, pos = self.get_next_token(self.tokens, pos)
@@ -254,9 +257,8 @@ class Sintatico(object):
                     self.pos_global = pos - 1
                     pos = self.programa()
                     return pos
-                    # self.erro(simb, pos)
-                    # self.indica_erro = 1
-                # return pos
+                else:
+                    return pos
             elif("," in simb):
                 return self.atribuicao_virgula(pos)
             else:
@@ -264,6 +266,7 @@ class Sintatico(object):
                 return self.erro(simb, pos)
         else:
             print "Simbolo", simb
+            return pos
 
     def declaracao(self, pos):
         """Verifica a declaracao"""
@@ -284,7 +287,6 @@ class Sintatico(object):
                     # print pos
                     valor = self.atribuicao(pos)
                     if(valor is None):
-                        print "erro"
                         self.indica_erro = 1
                         exit()
                     return valor
@@ -323,7 +325,7 @@ class Sintatico(object):
     def conector(self, lista, tabela):
         """Realiza a ponte de conexão entre o Analisador Lexico e o Sintático"""
         # print "Entrada Sintático ", lista
-        print lista
+        # print lista
         self.lista = lista
         self.tabela = tabela
         cont = 0

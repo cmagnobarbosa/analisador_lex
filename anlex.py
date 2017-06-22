@@ -259,6 +259,6 @@ if __name__ == '__main__':
     sin.conector(token_geral, tabela_token)
     # print "Erros ", exibe_imprime("lista_erros", lista_erros)
     lista_erros = []
-    print "Tabela", tabela_token
+    # print "Tabela", tabela_token
     imprime_tabela(tabela_token)
     # print "Comentário:", acumula

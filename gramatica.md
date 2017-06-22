@@ -21,11 +21,8 @@ int|float|char
 Repeticao ->
 while(**Expressao**){**Bloco**};|**Programa**
 
-Expressao -> (**Expressao_aritmetico**);|(**Expressao_logica**);|**Programa**
+Expressao -> (**Expressao**);|**Programa**
 
-Expressao_aritmetico ->
-
-Expressao_logica ->
 
 condicao -> if(**Expressao**){**Bloco**};|**Programa**
 
