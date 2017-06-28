@@ -1,0 +1,5 @@
+Load $S1,a
+Load $S2,b
+Load $S3,c
+Add $S4,$S1,$S2
+Store $S3,$S4

@@ -1,10 +1,9 @@
 # coding: utf-8
 """
 Analisador Sintático
+Semantico
 Carlos Magno
 """
-# tokens = ["(", "a", "+", "a", ")", "$"]
-
 # NUM LITERAL ID
 
 
@@ -15,11 +14,13 @@ class Sintatico(object):
         self.tokens = []
         self.lista = []
         self.tabela = []
+        self.tabela_declaracao = {}
         self.elemento = ["NUM", " ID ", " Literal ",
                          "int", "float", "char", "while", "if"]
         self.tipo = ["int", "float", "char"]
         self.pos_global = -1
         self.indica_erro = 0
+        self.cont = 0
 
     def E(self, simb, lista, pos):
         """Pertence a expressao arimética"""
@@ -36,7 +37,7 @@ class Sintatico(object):
         return pos
 
     def logicos(self, simb, lista, pos):
-        print "entrou"
+        """Logico"""
         if(simb is ">" or simb is "<"):
             return self.T(simb, lista, pos)
         else:
@@ -93,7 +94,9 @@ class Sintatico(object):
         """Válida adição e subtração."""
         if(simb == "+"):
             simb, pos = self.get_next_token(lista, pos)
-            return self.T(simb, lista, pos)
+            print simb, pos, self.tabela_declaracao[self.consulta_tabela(pos)[1]][0]
+            retorno_geracao = self.gera_codigo("add", pos, None)
+            return self.T(simb, lista, pos), retorno_geracao
             # Elinha(simb, lista, pos)
         elif (simb == ")" or simb == ";"):
             print "Expressão Válida"
@@ -125,7 +128,6 @@ class Sintatico(object):
         else:
             if(not(simb in " NUM " or simb in " ID " or simb in "Literal")):
                 # print "Erro Caracter Posicao ", pos, simb
-                print "fora"
                 self.erro(simb, pos)
                 self.indica_erro = 1
 
@@ -137,14 +139,14 @@ class Sintatico(object):
         return pos
 
     def consulta_tabela(self, posicao):
-        """Retorna a Linha do erro"""
+        """Retorna a Linha do erro e o elemento"""
         # print "Pos", posicao
         if(posicao >= len(self.lista)):
             posicao -= 1
         for i in range(posicao, -1, -1):
             for palavras in self.elemento:
                 if(self.lista[i][0] in palavras):
-                    return self.tabela[self.lista[i][2]][2].split(" ")[0]
+                    return self.tabela[self.lista[i][2]][2].split(" ")[0], self.tabela[self.lista[i][2]][1]
 
     def erro(self, simb, pos):
         """Indica que ocorreu um erro"""
@@ -159,9 +161,46 @@ class Sintatico(object):
 
         return pos
 
+    def retorna_registrador(self, pos):
+        """Retorna o registrador"""
+        return self.tabela_declaracao[self.consulta_tabela(pos)[1]][2]
+
+    def gera_codigo(self, opcao, pos, retorno_geracao):
+        """Realiza a geração de código"""
+        arquivo = open("geracao", "a")
+        self.cont += 1
+        registrador = "$S" + str(self.cont)
+        print registrador
+        if(opcao == "load"):
+            simb = self.consulta_tabela(pos)[1]
+            exp = "Load " + registrador + "," + str(simb)
+            arquivo.write(exp)
+            arquivo.write('\n')
+            lista = self.tabela_declaracao[simb]
+            lista.append(registrador)
+            self.tabela_declaracao[simb] = lista
+            # print self.tabela_declaracao[simb]
+        elif(opcao == "add"):
+            # print self.tabela_declaracao
+            simb = self.retorna_registrador(pos - 2)
+            simb2 = self.retorna_registrador(pos)
+            retorno_geracao = "Add " + registrador + \
+                "," + str(simb) + "," + str(simb2)
+            print retorno_geracao
+            arquivo.write(retorno_geracao)
+            arquivo.write('\n')
+            return retorno_geracao
+        elif(opcao == "store"):
+            exp = "Store " + str(self.retorna_registrador(pos)) + \
+                "," + str(retorno_geracao.split(" ")[1].split(",")[0])
+            print exp
+            arquivo.write(exp)
+            arquivo.write('\n')
+        arquivo.close()
+
     def programa(self):
         """Função programa"""
-        #self.pos_global -= 1
+        # self.pos_global -= 1
         simb, pos = self.get_next_token(self.tokens, self.pos_global)
         print "First PROG ", simb
         if(simb is "$"):
@@ -208,7 +247,6 @@ class Sintatico(object):
         pos = self.E(simb, self.tokens, pos)
         simb, pos = self.get_next_token(self.tokens, pos)
         if(simb in " { "):
-
             self.pos_global = pos
             pos = self.programa()
             simb = self.tokens[pos]
@@ -224,13 +262,18 @@ class Sintatico(object):
             self.erro(simb, pos)
             return pos
 
-    def atribuicao_virgula(self, pos):
+    def declaracao_virgula(self, pos, tipo):
+        """Válida declaração multipla"""
         simb, pos = self.get_next_token(self.tokens, pos)
+        self.adiciona_tabela(pos, tipo)
         if("ID" in simb):
+            self.gera_codigo("load", pos, None)
             simb, pos = self.get_next_token(self.tokens, pos)
+
             if("," in simb):
-                self.atribuicao_virgula(pos)
+                self.declaracao_virgula(pos)
             elif(";" in simb):
+                # print "Declaração Múltipla Válida"
                 return pos
             else:
                 self.erro(simb, pos)
@@ -243,15 +286,15 @@ class Sintatico(object):
         """Válida uma atribuicao"""
         simb = self.tokens[pos]
         # print simb
-
+        pos_geracao = pos
         if("ID" in simb):
             simb, pos = self.get_next_token(self.tokens, pos)
 
             if("=" in simb):
                 simb, pos = self.get_next_token(self.tokens, pos)
-
+                pos, retorno_geracao = self.E(simb, self.tokens, pos)
                 print "Atribuição Válida"
-                pos = self.E(simb, self.tokens, pos)
+                self.gera_codigo("store", pos_geracao, retorno_geracao)
                 simb, pos = self.get_next_token(self.tokens, pos)
                 if(simb is not ";" and simb is not "$"):
                     self.pos_global = pos - 1
@@ -259,14 +302,25 @@ class Sintatico(object):
                     return pos
                 else:
                     return pos
-            elif("," in simb):
-                return self.atribuicao_virgula(pos)
             else:
 
                 return self.erro(simb, pos)
         else:
-            print "Simbolo", simb
+            print "Símbolo", simb
             return pos
+
+    def adiciona_tabela(self, pos, tipo):
+        """Verifica se o elemento já esta na tabela"""
+        # print self.lista[pos], self.lista
+        simb = self.lista[pos][1]
+        linha = self.consulta_tabela(pos)
+        if(simb in self.tabela_declaracao):
+            print "Erro Simbolo:", simb, ",Já declarado ", self.tabela_declaracao[simb][1]
+            self.indica_erro = 1
+        else:
+            print "Adicionado na lista de símbolos"
+            self.tabela_declaracao[simb] = [tipo, linha]
+            # print self.tabela_declaracao
 
     def declaracao(self, pos):
         """Verifica a declaracao"""
@@ -275,13 +329,20 @@ class Sintatico(object):
 
         if(simb in self.tipo):
             """Verifica se simolo é int, float ou char."""
+            tipo = simb
             simb, pos = self.get_next_token(self.tokens, pos)
             # print simb
             if(simb in " ID "):
+                # print self.tokens[pos - 1], self.lista[pos][1],
+                # self.consulta_tabela(pos)
+                self.adiciona_tabela(pos, tipo)
+                self.gera_codigo("load", pos, None)
                 simb, pos = self.get_next_token(self.tokens, pos)
                 if(simb is ";"):
                     print "Declaração Válida."
                     return pos
+                elif("," in simb):
+                    return self.declaracao_virgula(pos, tipo)
                 else:
                     pos -= 1
                     # print pos
@@ -300,10 +361,9 @@ class Sintatico(object):
             pos = self.E(simb, self.tokens, pos)
             simb, pos = self.get_next_token(self.tokens, pos)
             if(simb in "$"):
-                print "Leitura Completa - Válido"
+                print "Leitura Completa"
                 return pos
             elif("{" in simb):
-                print "aqui"
                 simb, pos = self.get_next_token(self.tokens, pos)
                 self.pos_global = pos
                 ret_pos = self.bloco()

@@ -1,0 +1,26 @@
+Atribuição
+Verificar se já foi declarado.
+
+Gramatica de Atributos
+Verificar se os tipos são compativeis.
+Exemplo
+Int a ;
+char c;
+int b;
+b = c;
+(Erro, os tipos são diferentes.)
+
+a= b
+(Válido os tipos são iguais.)
+
+
+//
+Verificação de Tipos , Retorna os tipos.
+Compara os tipos dentro da expressão.
+
+Retorna os tipos e verifica
+
+Dica//
+
+Para conferir o tipo jogue o elemento na tabela de declaração.
+Chame a consulta_tabela pegue o segundo Retorno[pos 1] e jogue esta chave na tabela de declaracao
