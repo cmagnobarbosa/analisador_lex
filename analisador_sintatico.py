@@ -95,7 +95,7 @@ class Sintatico(object):
         if(simb == "+"):
             simb, pos = self.get_next_token(lista, pos)
             print simb, pos, self.tabela_declaracao[self.consulta_tabela(pos)[1]][0]
-            retorno_geracao = self.gera_codigo("add", pos, None)
+            retorno_geracao = self.gera_codigo("Add", pos, None)
             return self.T(simb, lista, pos), retorno_geracao
             # Elinha(simb, lista, pos)
         elif (simb == ")" or simb == ";"):
@@ -104,8 +104,9 @@ class Sintatico(object):
 
         elif (simb == "-"):
             simb, pos = self.get_next_token(lista, pos)
+            retorno_geracao = self.gera_codigo("Sub", pos, None)
             # print "simbolo2 ", simb, pos
-            return self.T(simb, lista, pos)
+            return self.T(simb, lista, pos), retorno_geracao
         else:
             return self.Tlinha(simb, lista, pos)
             # return 0
@@ -117,12 +118,14 @@ class Sintatico(object):
         # print"Elinha ", simb, pos
         if(simb == "*"):
             simb, pos = self.get_next_token(lista, pos)
+            retorno_geracao = self.gera_codigo("Mult", pos, None)
             # print "simbolo2 ", simb, pos
-            return self.F(simb, lista, pos)
+            return self.F(simb, lista, pos), retorno_geracao
             return self.Tlinha(simb, lista, pos)
         elif(simb == "/"):
             simb, pos = self.get_next_token(lista, pos)
-            return self.F(simb, lista, pos)
+            retorno_geracao = self.gera_codigo("Div", pos, None)
+            return self.F(simb, lista, pos), retorno_geracao
         elif (simb == ")" or simb == ";"):
             print "Expressão Válida"
         else:
@@ -171,7 +174,7 @@ class Sintatico(object):
         self.cont += 1
         registrador = "$S" + str(self.cont)
         print registrador
-        if(opcao == "load"):
+        if(opcao == "Load"):
             simb = self.consulta_tabela(pos)[1]
             exp = "Load " + registrador + "," + str(simb)
             arquivo.write(exp)
@@ -180,17 +183,17 @@ class Sintatico(object):
             lista.append(registrador)
             self.tabela_declaracao[simb] = lista
             # print self.tabela_declaracao[simb]
-        elif(opcao == "add"):
+        elif(opcao == "Add" or opcao == "Sub" or opcao == "Mult" or opcao == "Div"):
             # print self.tabela_declaracao
             simb = self.retorna_registrador(pos - 2)
             simb2 = self.retorna_registrador(pos)
-            retorno_geracao = "Add " + registrador + \
+            retorno_geracao = opcao + " " + registrador + \
                 "," + str(simb) + "," + str(simb2)
             print retorno_geracao
             arquivo.write(retorno_geracao)
             arquivo.write('\n')
             return retorno_geracao
-        elif(opcao == "store"):
+        elif(opcao == "Store"):
             exp = "Store " + str(self.retorna_registrador(pos)) + \
                 "," + str(retorno_geracao.split(" ")[1].split(",")[0])
             print exp
@@ -267,7 +270,7 @@ class Sintatico(object):
         simb, pos = self.get_next_token(self.tokens, pos)
         self.adiciona_tabela(pos, tipo)
         if("ID" in simb):
-            self.gera_codigo("load", pos, None)
+            self.gera_codigo("Load", pos, None)
             simb, pos = self.get_next_token(self.tokens, pos)
 
             if("," in simb):
@@ -294,7 +297,7 @@ class Sintatico(object):
                 simb, pos = self.get_next_token(self.tokens, pos)
                 pos, retorno_geracao = self.E(simb, self.tokens, pos)
                 print "Atribuição Válida"
-                self.gera_codigo("store", pos_geracao, retorno_geracao)
+                self.gera_codigo("Store", pos_geracao, retorno_geracao)
                 simb, pos = self.get_next_token(self.tokens, pos)
                 if(simb is not ";" and simb is not "$"):
                     self.pos_global = pos - 1
@@ -336,7 +339,7 @@ class Sintatico(object):
                 # print self.tokens[pos - 1], self.lista[pos][1],
                 # self.consulta_tabela(pos)
                 self.adiciona_tabela(pos, tipo)
-                self.gera_codigo("load", pos, None)
+                self.gera_codigo("Load", pos, None)
                 simb, pos = self.get_next_token(self.tokens, pos)
                 if(simb is ";"):
                     print "Declaração Válida."
