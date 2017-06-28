@@ -173,7 +173,6 @@ class Sintatico(object):
         arquivo = open("geracao", "a")
         self.cont += 1
         registrador = "$S" + str(self.cont)
-        print registrador
         if(opcao == "Load"):
             simb = self.consulta_tabela(pos)[1]
             exp = "Load " + registrador + "," + str(simb)
