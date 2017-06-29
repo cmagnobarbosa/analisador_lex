@@ -20,17 +20,16 @@ class Sintatico(object):
         self.tipo = ["int", "float", "char"]
         self.pos_global = -1
         self.indica_erro = 0
+        self.warning = 0
         self.cont = 0
 
     def E(self, simb, lista, pos):
         """Pertence a expressao arimética"""
-        # print simb
         if(simb in " NUM " or simb in " ID " or simb in "Literal" or simb == "("):
             return self.T(simb, lista, pos)
             return self.Elinha(simb, lista, pos)
             return self.logicos(simb, lista, pos)
         else:
-            # print "Erro Caracter Posição ", pos, simb
             self.erro(simb, pos)
             self.indica_erro = 1
             return pos
@@ -38,6 +37,7 @@ class Sintatico(object):
 
     def logicos(self, simb, lista, pos):
         """Logico"""
+        print "Entrouuu ", simb
         if(simb is ">" or simb is "<"):
             return self.T(simb, lista, pos)
         else:
@@ -48,6 +48,7 @@ class Sintatico(object):
         if(simb in " NUM " or simb in " ID " or simb in "Literal" or simb == "("):
 
             return self.F(simb, lista, pos)
+            self.logicos(simb, lista, pos)
             return self.Tlinha(simb, lista, pos)
         else:
 
@@ -59,11 +60,9 @@ class Sintatico(object):
     def F(self, simb, lista, pos):
 
         if(simb == "("):
-
             simb, pos = self.get_next_token(lista, pos)
             return self.E(simb, lista, pos)
             if(simb != ")"):
-                # print "Erro Caracter Posicao F ", pos
                 exit()
         elif(simb in " NUM " or simb in " ID " or simb in "Literal"):
             simb, pos = self.get_next_token(lista, pos)
@@ -110,11 +109,9 @@ class Sintatico(object):
 
     def Tlinha(self, simb, lista, pos):
         """Válida multiplicação"""
-        # print"Elinha ", simb, pos
         if(simb == "*"):
             simb, pos = self.get_next_token(lista, pos)
             retorno_geracao, tipo_retorno = self.gera_codigo("Mult", pos, None)
-            # print "simbolo2 ", simb, pos
             return self.F(simb, lista, pos), retorno_geracao, tipo_retorno
             return self.Tlinha(simb, lista, pos)
         elif(simb == "/"):
@@ -129,6 +126,11 @@ class Sintatico(object):
                 self.indica_erro = 1
 
         return pos
+
+    def warning_inicializado(self, pos):
+        """Warning Variavel sem inicializar"""
+        print "Atenção: Varíavel sem inicializar Linha", self.consulta_tabela(pos)[0]
+        self.warning = 1
 
     def valido(self, pos):
         print "Leitura Completa."
@@ -157,9 +159,21 @@ class Sintatico(object):
 
         return pos
 
+    def verica_declarado(self, simb):
+        """Verifica se o simbolo já foi declarado"""
+        if(simb not in self.elemento):
+            simb = self.consulta_tabela(simb)[1]
+        if(simb not in self.tabela_declaracao):
+            print "Símbolo Não declarado", simb
+            #self.erro("Símbolo Não declarado", simb,)
+            return -1
+        else:
+            return 1
+
     def retorna_registrador(self, pos):
         """Retorna o registrador"""
-        return self.tabela_declaracao[self.consulta_tabela(pos)[1]][2]
+        if(self.verica_declarado(pos) is 1):
+            return self.tabela_declaracao[self.consulta_tabela(pos)[1]][2]
 
     def compara_tipo(self, a, b):
         """ Compara os tipos"""
@@ -169,14 +183,22 @@ class Sintatico(object):
 
     def verifica_tipos(self, tipo_a, tipo_b):
         """Verica se os tipos são compativeis"""
+
         if(tipo_a in self.elemento):
             retorno = tipo_a
         else:
             retorno = tipo_b
         if(tipo_a not in self.elemento):
-            tipo_a = self.tabela_declaracao[self.consulta_tabela(tipo_a)[1]][0]
+
+            if(self.verica_declarado(tipo_a) is 1):
+                tipo_a = self.tabela_declaracao[
+                    self.consulta_tabela(tipo_a)[1]][0]
+
         if(tipo_b not in self.elemento):
-            tipo_b = self.tabela_declaracao[self.consulta_tabela(tipo_b)[1]][0]
+            if(self.verica_declarado(tipo_b) is 1):
+                tipo_b = self.tabela_declaracao[
+                    self.consulta_tabela(tipo_b)[1]][0]
+
         if(tipo_a != tipo_b):
             print "Erro - Tipos diferentes", tipo_a, tipo_b
             self.erro("Tipos Diferentes", retorno)
@@ -220,7 +242,7 @@ class Sintatico(object):
         """Função programa"""
         # self.pos_global -= 1
         simb, pos = self.get_next_token(self.tokens, self.pos_global)
-        print "First PROG ", simb
+        # print "First PROG ", simb
         if(simb is "$"):
             """Final da leitura"""
             return self.valido(pos)
@@ -286,7 +308,7 @@ class Sintatico(object):
         if("ID" in simb):
             self.gera_codigo("Load", pos, None)
             simb, pos = self.get_next_token(self.tokens, pos)
-
+            self.warning_inicializado(pos)
             if("," in simb):
                 self.declaracao_virgula(pos)
             elif(";" in simb):
@@ -308,11 +330,18 @@ class Sintatico(object):
 
             if("=" in simb):
                 simb, pos = self.get_next_token(self.tokens, pos)
-                pos, retorno_geracao, tipo_retorno = self.E(
-                    simb, self.tokens, pos)
+                try:
+                    pos, retorno_geracao, tipo_retorno = self.E(
+                        simb, self.tokens, pos)
+                    self.gera_codigo("Store", pos_geracao, retorno_geracao)
+                    self.verifica_tipos(tipo_retorno, pos_geracao)
+                except Exception as e:
+                    pos = self.E(simb, self.tokens, pos)
+                else:
+                    pass
+
                 print "Atribuição Válida"
-                self.gera_codigo("Store", pos_geracao, retorno_geracao)
-                self.verifica_tipos(tipo_retorno, pos_geracao)
+
                 simb, pos = self.get_next_token(self.tokens, pos)
                 if(simb is not ";" and simb is not "$"):
                     self.pos_global = pos - 1
@@ -355,8 +384,10 @@ class Sintatico(object):
                 self.adiciona_tabela(pos, tipo)
                 self.gera_codigo("Load", pos, None)
                 simb, pos = self.get_next_token(self.tokens, pos)
+
                 if(simb is ";"):
                     print "Declaração Válida."
+                    self.warning_inicializado(pos)
                     return pos
                 elif("," in simb):
                     return self.declaracao_virgula(pos, tipo)
@@ -417,7 +448,9 @@ class Sintatico(object):
         self.tokens.append("$")
         print "Entrada Sintático ", self.tokens
         self.programa()
-        if(self.indica_erro is 0):
+        if(self.indica_erro is 0 and self.warning is 0):
             print "Retorno sem erros"
+        elif(self.warning is 1):
+            print "Leitura Completa - Verifique os [WARNINGS]"
         else:
-            print "Leitura Completa - Verifique erros"
+            print "Leitura Completa - Verifique os Erros"
