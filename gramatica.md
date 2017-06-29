@@ -1,3 +1,28 @@
+# Gerador de código
+
+O gerador de código gera um código em uma versão simplificada de assembly.
+
+Soma - > Add
+
+subtração -> Sub
+
+Multiplicação -> Multi
+
+Divisão -> Div
+
+Load
+
+Store
+
+if -> beq
+
+
+# Analisador Semântico
+
+O analisador Semântico, realiza a verificação de tipos, cria tabela de simbolos.
+
+*Geração de warning para variáveis não inicializadas.
+
 # analisador Sintático
 
  a = 8 +8

@@ -22,6 +22,7 @@ class Sintatico(object):
         self.indica_erro = 0
         self.warning = 0
         self.cont = 0
+        self.flag = 0
 
     def E(self, simb, lista, pos):
         """Pertence a expressao arimética"""
@@ -97,7 +98,7 @@ class Sintatico(object):
             print "Expressão Válida"
             return pos
 
-        elif (simb == "-"):
+        elif(simb == "-"):
             simb, pos = self.get_next_token(lista, pos)
             retorno_geracao, tipo_retorno = self.gera_codigo("Sub", pos, None)
 
@@ -134,7 +135,10 @@ class Sintatico(object):
 
     def valido(self, pos):
         print "Leitura Completa."
-        return pos
+        if(self.flag is 1):
+            exit()
+        else:
+            return pos
 
     def consulta_tabela(self, posicao):
         """Retorna o elemento"""
@@ -227,6 +231,7 @@ class Sintatico(object):
             tipo_retorno = self.verifica_tipos(pos - 2, pos)
             retorno_geracao = opcao + " " + registrador + \
                 "," + str(simb) + "," + str(simb2)
+            print retorno_geracao
             arquivo.write(retorno_geracao)
             arquivo.write('\n')
             return retorno_geracao, tipo_retorno
@@ -236,6 +241,19 @@ class Sintatico(object):
             print exp
             arquivo.write(exp)
             arquivo.write('\n')
+        elif(opcao == "beq"):
+            exp = "BEQ " + str(registrador) + ",0,Label" + str(retorno_geracao)
+            print exp
+            arquivo.write(exp)
+            arquivo.write('\n')
+        elif(opcao == "label"):
+            exp = "Label1:"
+            print exp
+            arquivo.write(exp)
+            arquivo.write('\n')
+        elif(opcao == "jmp"):
+            exp = "JMP,Label1"
+            print exp
         arquivo.close()
 
     def programa(self):
@@ -269,13 +287,16 @@ class Sintatico(object):
             return self.programa()
         elif ("while" in simb):
             """Válida a estrutura de repetição while"""
+            self.flag = 1
             ret_pos = self.repeticao(pos)
             self.pos_global = ret_pos
             self.programa()
         elif (simb in " if "):
             """Valida a estrutura condicional"""
             simb, pos = self.get_next_token(self.tokens, pos)
+            self.gera_codigo("beq", pos, 1)
             pos = self.condicional(pos)
+            self.gera_codigo("label", pos, None)
 
         else:
             return pos
@@ -288,16 +309,19 @@ class Sintatico(object):
         if(simb in " { "):
             self.pos_global = pos
             pos = self.programa()
+            pos = pos - 2
             simb = self.tokens[pos]
             if(simb in " } "):
                 simb, pos = self.get_next_token(self.tokens, pos)
                 if(simb in " ; "):
                     print "Condicional Correto"
+
                 else:
                     self.erro(simb, pos)
                     return pos
 
         else:
+
             self.erro(simb, pos)
             return pos
 
@@ -404,9 +428,12 @@ class Sintatico(object):
         """Define a estrutura de repeticao"""
         simb = self.tokens[pos]
         # print "while"
+        print simb
         if(simb in "while"):
+            self.gera_codigo("label", pos, None)
             simb, pos = self.get_next_token(self.tokens, pos)
             pos = self.E(simb, self.tokens, pos)
+
             simb, pos = self.get_next_token(self.tokens, pos)
             if(simb in "$"):
                 print "Leitura Completa"
@@ -414,6 +441,7 @@ class Sintatico(object):
             elif("{" in simb):
                 simb, pos = self.get_next_token(self.tokens, pos)
                 self.pos_global = pos
+                self.gera_codigo("beq", pos, 2)
                 ret_pos = self.bloco()
                 simb = self.tokens[ret_pos - 2]
                 if("}" in simb):
@@ -423,8 +451,10 @@ class Sintatico(object):
                         print "While válido"
                         return pos
                 else:
-                    print "erro"
-                    self.erro(simb, pos)
+                    print "Bloco"
+                    self.gera_codigo("jmp", pos, None)
+                    # print "erro"
+                    ##self.erro(simb, pos)
 
     def bloco(self):
         """Bloco de programa"""
