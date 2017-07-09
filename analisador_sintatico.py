@@ -27,9 +27,9 @@ class Sintatico(object):
     def E(self, simb, lista, pos):
         """Pertence a expressao arimética"""
         if(simb in " NUM " or simb in " ID " or simb in "Literal" or simb == "("):
-            return self.T(simb, lista, pos)
-            return self.Elinha(simb, lista, pos)
-            return self.logicos(simb, lista, pos)
+            self.T(simb, lista, pos)
+            self.Elinha(simb, lista, pos)
+            self.logicos(simb, lista, pos)
         else:
             self.erro(simb, pos)
             self.indica_erro = 1
@@ -38,7 +38,6 @@ class Sintatico(object):
 
     def logicos(self, simb, lista, pos):
         """Logico"""
-        print "Entrouuu ", simb
         if(simb is ">" or simb is "<"):
             return self.T(simb, lista, pos)
         else:
@@ -48,9 +47,9 @@ class Sintatico(object):
 
         if(simb in " NUM " or simb in " ID " or simb in "Literal" or simb == "("):
 
-            return self.F(simb, lista, pos)
+            self.F(simb, lista, pos)
             self.logicos(simb, lista, pos)
-            return self.Tlinha(simb, lista, pos)
+            self.Tlinha(simb, lista, pos)
         else:
 
             self.erro(simb, pos)
@@ -62,7 +61,7 @@ class Sintatico(object):
 
         if(simb == "("):
             simb, pos = self.get_next_token(lista, pos)
-            return self.E(simb, lista, pos)
+            self.E(simb, lista, pos)
             if(simb != ")"):
                 exit()
         elif(simb in " NUM " or simb in " ID " or simb in "Literal"):
@@ -92,7 +91,7 @@ class Sintatico(object):
         if(simb == "+"):
             simb, pos = self.get_next_token(lista, pos)
             retorno_geracao, tipo_retorno = self.gera_codigo("Add", pos, None)
-            return self.T(simb, lista, pos), retorno_geracao, tipo_retorno
+            self.T(simb, lista, pos), retorno_geracao, tipo_retorno
             # Elinha(simb, lista, pos)
         elif (simb == ")" or simb == ";"):
             print "Expressão Válida"
@@ -102,9 +101,9 @@ class Sintatico(object):
             simb, pos = self.get_next_token(lista, pos)
             retorno_geracao, tipo_retorno = self.gera_codigo("Sub", pos, None)
 
-            return self.T(simb, lista, pos), retorno_geracao, tipo_retorno
+            self.T(simb, lista, pos), retorno_geracao, tipo_retorno
         else:
-            return self.Tlinha(simb, lista, pos)
+            self.Tlinha(simb, lista, pos)
 
         return pos
 
@@ -113,8 +112,8 @@ class Sintatico(object):
         if(simb == "*"):
             simb, pos = self.get_next_token(lista, pos)
             retorno_geracao, tipo_retorno = self.gera_codigo("Mult", pos, None)
-            return self.F(simb, lista, pos), retorno_geracao, tipo_retorno
-            return self.Tlinha(simb, lista, pos)
+            self.F(simb, lista, pos), retorno_geracao, tipo_retorno
+            self.Tlinha(simb, lista, pos)
         elif(simb == "/"):
             simb, pos = self.get_next_token(lista, pos)
             retorno_geracao, tipo_retorno = self.gera_codigo("Div", pos, None)
@@ -224,7 +223,8 @@ class Sintatico(object):
             lista.append(registrador)
             self.tabela_declaracao[simb] = lista
             # print self.tabela_declaracao[simb]
-        elif(opcao == "Add" or opcao == "Sub" or opcao == "Mult" or opcao == "Div"):
+        elif(opcao == "Add" or opcao == "Sub" or opcao == "Mult" or
+             opcao == "Div" or opcao == "Maior" or opcao == "Menor"):
             # print self.tabela_declaracao
             simb = self.retorna_registrador(pos - 2)
             simb2 = self.retorna_registrador(pos)
@@ -253,6 +253,8 @@ class Sintatico(object):
             arquivo.write('\n')
         elif(opcao == "jmp"):
             exp = "JMP,Label1"
+            arquivo.write(exp)
+            arquivo.write('\n')
             print exp
         arquivo.close()
 

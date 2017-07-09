@@ -1,26 +1,14 @@
 // int a,b;
 // //int b,c
 int a,b;
-int c;
-int d;
+int c=0;
+int d=0;
 int e,f;
 int i,g;
 int k;
 char j;
-//int j;
 
-k=b+c;
-a=b+c;
-d=e-f;
-j=g/d;
-// bola= g+i;
-
-if(1){
-    f=g*i;
-};
-while(1){
-    a=g/b;
-};
+a= b+a*b;
 
 // int d=(5+5);
 // int a;
